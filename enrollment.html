@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enrollment • ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    html { scroll-behavior: smooth; }
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; overflow-x: hidden; }
+    .layout { display: flex; min-height: 100vh; }
+    nav { width: 220px; background: #232946; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 32px 0; }
+    nav a { color: #fff; text-decoration: none; margin: 18px 0; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
+    header { height: 64px; background: rgba(255,255,255,0.95); box-shadow: 0 2px 12px rgba(35,41,70,0.06); display: flex; align-items: center; padding: 0 20px; color: #232946; font-weight: 500; gap: 12px; }
+    .card { background: rgba(255,255,255,0.98); border-radius: 18px; box-shadow: 0 8px 32px rgba(35,41,70,0.10); margin: 16px; padding: 20px; min-height: calc(100vh - 120px); flex: 1; overflow-y: auto; }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      nav { width: 100%; height: auto; padding: 16px 0; }
+      nav a { margin: 8px 0; font-size: 1rem; }
+      .card { margin: 8px; padding: 16px; }
+      header { padding: 0 16px; font-size: 1.1rem; }
+    }
+    input, button, textarea, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+    button { background: #007bff; color: white; font-weight: bold; border: none; transition: 0.3s; width: auto; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:40px;">
+        <div style="width:180px;height:100px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(30,60,114,0.4);padding:16px;position:relative;overflow:hidden;">
+          <!-- Geometric Background Pattern -->
+          <div style="position:absolute;top:-10px;right:-10px;width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
+          <div style="position:absolute;bottom:-15px;left:-15px;width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;transform:rotate(-30deg);"></div>
+          
+          <!-- Main Logo Icon -->
+          <div style="width:50px;height:50px;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+            <div style="width:30px;height:30px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;">
+              <div style="width:20px;height:20px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                <div style="width:12px;height:12px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:2px;position:relative;">
+                  <div style="position:absolute;top:2px;left:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
+                  <div style="position:absolute;bottom:2px;right:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Brand Text -->
+          <div style="font-size:1.4rem;font-weight:800;color:#fff;text-align:center;line-height:1.1;letter-spacing:2px;text-shadow:0 2px 4px rgba(0,0,0,0.3);">
+            <span style="color:#FFD700;text-shadow:0 0 10px rgba(255,215,0,0.5);">CS</span>
+          </div>
+          <div style="font-size:0.6rem;color:rgba(255,255,255,0.9);font-weight:500;margin-top:2px;letter-spacing:1px;">
+            ClassSahyogi
+          </div>
+        </div>
+      </div>
+      <a href="index.html"><span>🏠</span> Dashboard</a>
+      <a href="enrollment.html"><span>📝</span> Enrollment</a>
+      <a href="fees.html"><span>💰</span> Fees</a>
+      <a href="timetable.html"><span>📅</span> Timetable</a>
+      <a href="staff.html"><span>👥</span> Staff</a>
+      <a href="analytics.html"><span>📊</span> Analytics</a>
+      <a href="attendance.html"><span>🧾</span> Attendance</a>
+      <a href="marks.html"><span>🎓</span> Marks</a>
+    </nav>
+    <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
+      <header>
+        <div style="width:140px;height:45px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;padding:8px;position:relative;overflow:hidden;box-shadow:0 4px 15px rgba(30,60,114,0.3);">
+          <!-- Mini Geometric Pattern -->
+          <div style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
+          
+          <!-- Mini Logo Icon -->
+          <div style="width:25px;height:25px;background:rgba(255,255,255,0.95);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-right:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+            <div style="width:15px;height:15px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:4px;position:relative;">
+              <div style="position:absolute;top:1px;left:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
+              <div style="position:absolute;bottom:1px;right:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
+            </div>
+          </div>
+          
+          <!-- Brand Text -->
+          <div style="font-size:0.9rem;font-weight:800;color:#fff;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,0.3);">
+            <span style="color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,0.4);">CS</span>
+          </div>
+        </div>
+        <span>📝 ClassSahyogi - Enrollment</span>
+      </header>
+      <div class="card">
+        <a href="javascript:void(0)" onclick="goToDashboard()" style="display:inline-block; margin-bottom:12px; background:#e5e7eb; color:#111827; padding:8px 14px; border-radius:8px; text-decoration:none;">← Back to Dashboard</a>
+        <h4 style="margin-top:0; color: #333; font-size: 1.5rem;">📝 Student Registration & Enrollment</h4>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+          <input type="text" id="name" placeholder="Full Name">
+          <input type="text" id="roll" placeholder="Unique Roll Number">
+          <button id="genRollBtn" onclick="generateUniqueRoll()">Generate Roll</button>
+          <input type="date" id="dob" placeholder="Date of Birth">
+          <input type="text" id="contact" placeholder="Contact Number">
+          <input type="text" id="class" placeholder="Class / Division">
+          <input type="text" id="course" placeholder="Course">
+          <input type="text" id="semester" placeholder="Semester">
+          <input type="text" id="section" placeholder="Section">
+          <input type="text" id="subjects" placeholder="Subjects (comma-separated)">
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr; gap:12px; margin-top:10px;">
+          <textarea id="address" placeholder="Address" style="width:100%; min-height:70px;"></textarea>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top:10px; align-items:center;">
+          <div>
+            <label style="display:block; margin-bottom:6px;">Photo</label>
+            <input type="file" id="photo" accept="image/*">
+            <img id="photoPreview" alt="Photo preview" style="margin-top:8px; width:96px; height:96px; object-fit:cover; border-radius:8px; display:none; border:1px solid #ddd; background:#fff;" />
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Documents (ID, certificates, marksheets)</label>
+            <input type="file" id="documents" multiple accept="application/pdf,image/*,.doc,.docx,.zip">
+            <div id="docsList" style="font-size:14px; color:#555; margin-top:6px;"></div>
+          </div>
+        </div>
+        <button onclick="addStudent()" style="margin-top:14px;">Add Student</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check user role and restrict access
+    window.addEventListener('load', function() {
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      
+      if (currentUser.role === 'teacher') {
+        // Hide staff link for teachers
+        const staffLink = document.querySelector('a[href="staff.html"]');
+        if (staffLink) {
+          staffLink.style.display = 'none';
+        }
+        
+        // Add notice about restrictions
+        const nav = document.querySelector('nav');
+        const restrictionNotice = document.createElement('div');
+        restrictionNotice.innerHTML = `
+          <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 10px; margin: 10px; color: #856404; font-size: 0.9rem;">
+            <strong>⚠️ Teacher Access:</strong> You can manage students but cannot access staff management.
+          </div>
+        `;
+        nav.appendChild(restrictionNotice);
+      }
+    });
+
+    function goToDashboard() {
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      
+      if (currentUser.role === 'admin') {
+        window.location.href = 'admin-dashboard.html';
+      } else if (currentUser.role === 'teacher') {
+        window.location.href = 'teacher-dashboard.html';
+      } else if (currentUser.role === 'student') {
+        window.location.href = 'student-dashboard.html';
+      } else {
+        // No user logged in, go to main page
+        window.location.href = 'index.html';
+      }
+    }
+
+    function addStudent() {
+      const name = document.getElementById("name").value.trim();
+      const roll = document.getElementById("roll").value.trim();
+      const studentClass = document.getElementById("class").value.trim();
+      const dob = document.getElementById("dob").value;
+      const contact = (document.getElementById("contact")?.value || '').trim();
+      const address = (document.getElementById("address")?.value || '').trim();
+      const course = (document.getElementById("course")?.value || '').trim();
+      const semester = (document.getElementById("semester")?.value || '').trim();
+      const section = (document.getElementById("section")?.value || '').trim();
+      const subjects = (document.getElementById("subjects")?.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+      const photoInput = document.getElementById("photo");
+      const docsInput = document.getElementById("documents");
+
+      if (name && roll && studentClass && dob) {
+        const student = { name, roll, class: studentClass, dob, contact, address, course, semester, section, subjects, photo: '', documents: [] };
+        let students = JSON.parse(localStorage.getItem("students")) || [];
+        if (students.find(s => s.roll === roll)) { alert('Roll already exists. Generate a new one.'); return; }
+        students.push(student);
+        localStorage.setItem("students", JSON.stringify(students));
+
+        const savePhoto = () => new Promise(resolve => {
+          if (photoInput && photoInput.files && photoInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = () => { resolve(reader.result); };
+            reader.onerror = () => { resolve(''); };
+            reader.readAsDataURL(photoInput.files[0]);
+          } else { resolve(''); }
+        });
+        const saveDocuments = () => new Promise(async resolve => {
+          if (docsInput && docsInput.files && docsInput.files.length) {
+            const files = Array.from(docsInput.files);
+            const readFile = (f) => new Promise(r => { const fr = new FileReader(); fr.onload = () => r({ name: f.name, dataUrl: fr.result }); fr.onerror = () => r({ name: f.name, dataUrl: '' }); fr.readAsDataURL(f); });
+            const docs = await Promise.all(files.map(readFile));
+            resolve(docs);
+          } else { resolve([]); }
+        });
+        Promise.all([savePhoto(), saveDocuments()]).then(([photoDataUrl, docs]) => {
+          let saved = JSON.parse(localStorage.getItem("students")) || [];
+          const idx = saved.findIndex(s => s.roll === student.roll);
+          if (idx !== -1) {
+            saved[idx].photo = photoDataUrl || '';
+            saved[idx].documents = docs || [];
+            localStorage.setItem("students", JSON.stringify(saved));
+          }
+          alert("✅ Student added successfully!");
+          
+          // Redirect based on user role
+          const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+          if (currentUser.role === 'teacher') {
+            window.location.href = 'teacher-dashboard.html';
+          } else if (currentUser.role === 'admin') {
+            window.location.href = 'admin-dashboard.html';
+          } else {
+            window.location.href = 'index.html';
+          }
+        });
+      } else {
+        alert("⚠️ Please fill in all fields.");
+      }
+    }
+    function generateUniqueRoll() {
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const existing = new Set(students.map(s => s.roll));
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth()+1).padStart(2,'0');
+      const d = String(today.getDate()).padStart(2,'0');
+      let seq = 1; let roll = '';
+      do { roll = `R-${y}${m}${d}-${String(seq).padStart(4,'0')}`; seq++; } while (existing.has(roll));
+      document.getElementById('roll').value = roll;
+    }
+    const photoInputEl = document.getElementById('photo');
+    if (photoInputEl) {
+      photoInputEl.addEventListener('change', function() {
+        const file = this.files && this.files[0];
+        const pv = document.getElementById('photoPreview');
+        if (file && pv) {
+          const reader = new FileReader();
+          reader.onload = () => { pv.src = reader.result; pv.style.display = 'block'; };
+          reader.onerror = () => { pv.src = ''; pv.style.display = 'none'; };
+          reader.readAsDataURL(file);
+        } else if (pv) { pv.src = ''; pv.style.display = 'none'; }
+      });
+    }
+    const docsInputEl = document.getElementById('documents');
+    if (docsInputEl) {
+      docsInputEl.addEventListener('change', function() {
+        const list = document.getElementById('docsList');
+        if (!list) return;
+        const files = Array.from(this.files || []);
+        list.innerHTML = files.length ? files.map(f => `• ${f.name}`).join('<br>') : '';
+      });
+    }
+  </script>
+</body>
+</html>
+
+

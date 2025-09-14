@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal - ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ff6b6b 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 25px rgba(30,60,114,0.4);
+    }
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+    }
+    .success {
+      color: #27ae60;
+      margin-top: 10px;
+    }
+    .back-link {
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <div class="logo-text">CS</div>
+    </div>
+    <h2>🎓 Student Portal</h2>
+    <p style="color: #666; margin-bottom: 30px;">Enter your roll number to view your academic progress</p>
+    
+    <form id="studentLoginForm">
+      <input type="text" id="rollNumber" placeholder="Enter your Roll Number" required>
+      <button type="submit">View My Progress</button>
+    </form>
+    
+    <div id="message"></div>
+    
+    <div class="back-link">
+      <a href="index.html">← Back to Teacher Login</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('studentLoginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const rollNumber = document.getElementById('rollNumber').value.trim();
+      const messageDiv = document.getElementById('message');
+      
+      if (!rollNumber) {
+        messageDiv.innerHTML = '<div class="error">Please enter your roll number</div>';
+        return;
+      }
+      
+      // Check if student exists
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const student = students.find(s => s.roll === rollNumber);
+      
+      if (student) {
+        // Store current student data and redirect to student dashboard
+        localStorage.setItem('currentStudent', JSON.stringify(student));
+        window.location.href = 'student-dashboard.html';
+      } else {
+        messageDiv.innerHTML = '<div class="error">Roll number not found. Please check your roll number or contact your teacher.</div>';
+      }
+    });
+  </script>
+</body>
+</html>

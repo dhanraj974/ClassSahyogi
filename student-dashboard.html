@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Progress - ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ff6b6b 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(30,60,114,0.3);
+    }
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    .logo-text {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .student-info {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    .performance-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .excellent { background: #27ae60; }
+    .good { background: #f39c12; }
+    .poor { background: #e74c3c; }
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin: 20px 0;
+    }
+    .back-btn {
+      background: #e5e7eb;
+      color: #111827;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 20px;
+      transition: background 0.3s;
+    }
+    .back-btn:hover {
+      background: #d1d5db;
+    }
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .subject-card {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+    .subject-name {
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 10px;
+    }
+    .subject-marks {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .attendance-table th,
+    .attendance-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .attendance-table th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #4a5568;
+    }
+    .attendance-status {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .present { background: #d4edda; color: #155724; }
+    .absent { background: #f8d7da; color: #721c24; }
+    .info-item {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+    .info-item:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-text">CS</div>
+    </div>
+    <h1>📊 My Academic Progress</h1>
+    <div class="student-info" id="studentInfo">
+      <!-- Student info will be loaded here -->
+    </div>
+    <button onclick="logout()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+      🚪 Logout
+    </button>
+  </div>
+
+  <div class="container">
+     <a href="index.html" class="back-btn">← Back to Main Portal</a>
+    
+    <!-- Performance Overview -->
+    <div class="card">
+      <h2>📈 Performance Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="overallAttendance">0%</div>
+          <div class="stat-label">Overall Attendance</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="overallMarks">0%</div>
+          <div class="stat-label">Overall Marks</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalSubjects">0</div>
+          <div class="stat-label">Total Subjects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="performanceStatus">Good</div>
+          <div class="stat-label">Performance Status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Chart -->
+    <div class="card">
+      <h2>📅 Attendance Trend</h2>
+      <div class="chart-container">
+        <canvas id="attendanceChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Marks Chart -->
+    <div class="card">
+      <h2>🎓 Subject-wise Marks</h2>
+      <div class="chart-container">
+        <canvas id="marksChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Subject Details -->
+    <div class="card">
+      <h2>📚 Subject-wise Performance</h2>
+      <div class="subjects-grid" id="subjectsGrid">
+        <!-- Subject cards will be loaded here -->
+      </div>
+    </div>
+
+    <!-- Recent Attendance -->
+    <div class="card">
+      <h2>📋 Recent Attendance Records</h2>
+      <table class="attendance-table" id="attendanceTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Attendance records will be loaded here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    let currentStudent = null;
+    let attendanceData = {};
+    let marksData = {};
+
+    // Load student data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get current user from session storage
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      
+      if (currentUser.role !== 'student') {
+        alert('Access denied! This page is for students only.');
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // Find student data from localStorage using the roll number
+      const students = JSON.parse(localStorage.getItem('students') || '[]');
+      currentStudent = students.find(s => s.roll === currentUser.id);
+      
+      if (!currentStudent) {
+        alert('Student data not found. Please contact administrator.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      loadStudentData();
+      loadAttendanceData();
+      loadMarksData();
+      updatePerformanceIndicators();
+      createCharts();
+    });
+
+    function loadStudentData() {
+      const studentInfo = document.getElementById('studentInfo');
+      
+      // Calculate age from date of birth
+      const age = currentStudent.dob ? calculateAge(currentStudent.dob) : 'N/A';
+      
+      studentInfo.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+          ${currentStudent.photo ? 
+            `<img src="${currentStudent.photo}" alt="Student Photo" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3);">` : 
+            `<div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2rem;">👤</div>`
+          }
+          <div>
+            <h3 style="margin: 0 0 5px 0; font-size: 1.8rem;">${currentStudent.name}</h3>
+            <p style="margin: 0; opacity: 0.9; font-size: 1.1rem;">Roll Number: ${currentStudent.roll}</p>
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+          <div class="info-item">
+            <strong>📚 Class:</strong> ${currentStudent.class || 'N/A'}
+          </div>
+          <div class="info-item">
+            <strong>🏫 Section:</strong> ${currentStudent.section || 'N/A'}
+          </div>
+          <div class="info-item">
+            <strong>🎓 Course:</strong> ${currentStudent.course || 'N/A'}
+          </div>
+          <div class="info-item">
+            <strong>📅 Semester:</strong> ${currentStudent.semester || 'N/A'}
+          </div>
+          <div class="info-item">
+            <strong>🎂 Date of Birth:</strong> ${currentStudent.dob ? formatDate(currentStudent.dob) : 'N/A'}
+          </div>
+          <div class="info-item">
+            <strong>👶 Age:</strong> ${age}
+          </div>
+          <div class="info-item">
+            <strong>📞 Contact:</strong> ${currentStudent.contact || 'N/A'}
+          </div>
+          <div class="info-item">
+            <strong>🏠 Address:</strong> ${currentStudent.address || 'N/A'}
+          </div>
+        </div>
+        
+        ${currentStudent.subjects && currentStudent.subjects.length > 0 ? `
+          <div style="margin-top: 20px;">
+            <strong>📖 Subjects:</strong>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+              ${currentStudent.subjects.map(subject => 
+                `<span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem;">${subject}</span>`
+              ).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+    }
+    
+    function calculateAge(birthDate) {
+      const today = new Date();
+      const birth = new Date(birthDate);
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      return age + ' years';
+    }
+    
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+
+    function loadAttendanceData() {
+      const attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+      const studentAttendance = attendance[currentStudent.class] || {};
+      
+      // Calculate overall attendance
+      let totalDays = 0;
+      let presentDays = 0;
+      
+      Object.values(studentAttendance).forEach(dayAttendance => {
+        const studentRecord = dayAttendance.find(record => 
+          record.roll === currentStudent.roll || record.rollNumber === currentStudent.roll
+        );
+        if (studentRecord) {
+          totalDays++;
+          if (studentRecord.status === 'Present' || studentRecord.status === 'present') {
+            presentDays++;
+          }
+        }
+      });
+      
+      const attendancePercentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+      
+      document.getElementById('overallAttendance').textContent = attendancePercentage + '%';
+      
+      // Load recent attendance records
+      loadRecentAttendance(studentAttendance);
+    }
+
+    function loadMarksData() {
+      const marks = JSON.parse(localStorage.getItem('marks')) || {};
+      
+      // Calculate overall marks - check both class-based and roll-based structures
+      let totalMarks = 0;
+      let totalSubjects = 0;
+      let subjects = [];
+      
+      // First try class-based structure
+      const classMarks = marks[currentStudent.class] || {};
+      Object.entries(classMarks).forEach(([subject, subjectMarks]) => {
+        const studentMark = subjectMarks.find(record => 
+          record.rollNumber === currentStudent.roll || record.roll === currentStudent.roll
+        );
+        if (studentMark && studentMark.marks) {
+          const percentage = Math.round((studentMark.marks / (studentMark.totalMarks || 100)) * 100);
+          totalMarks += percentage;
+          totalSubjects++;
+          subjects.push({
+            name: subject,
+            marks: studentMark.marks,
+            totalMarks: studentMark.totalMarks || 100,
+            percentage: percentage
+          });
+        }
+      });
+      
+      // If no class-based marks found, try roll-based structure
+      if (totalSubjects === 0) {
+        const studentMarks = marks[currentStudent.roll] || {};
+        const subjectNames = ['english', 'math', 'science', 'social', 'computer'];
+        
+        subjectNames.forEach(subject => {
+          const mark = parseFloat(studentMarks[subject]);
+          if (!isNaN(mark)) {
+            totalMarks += mark;
+            totalSubjects++;
+            subjects.push({
+              name: subject.charAt(0).toUpperCase() + subject.slice(1),
+              marks: mark,
+              totalMarks: 100,
+              percentage: mark
+            });
+          }
+        });
+      }
+      
+      const overallPercentage = totalSubjects > 0 ? Math.round(totalMarks / totalSubjects) : 0;
+      
+      document.getElementById('overallMarks').textContent = overallPercentage + '%';
+      document.getElementById('totalSubjects').textContent = totalSubjects;
+      
+      // Load subject details
+      loadSubjectDetails(subjects);
+    }
+
+    function loadRecentAttendance(attendanceData) {
+      const tbody = document.querySelector('#attendanceTable tbody');
+      tbody.innerHTML = '';
+      
+      // Get recent 10 attendance records
+      const recentRecords = Object.entries(attendanceData)
+        .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+        .slice(0, 10);
+      
+      recentRecords.forEach(([date, dayAttendance]) => {
+        const studentRecord = dayAttendance.find(record => 
+          record.roll === currentStudent.roll || record.rollNumber === currentStudent.roll
+        );
+        if (studentRecord) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${new Date(date).toLocaleDateString()}</td>
+            <td>${studentRecord.subject || 'General'}</td>
+            <td><span class="attendance-status ${studentRecord.status.toLowerCase()}">${studentRecord.status.toUpperCase()}</span></td>
+            <td>${studentRecord.remarks || '-'}</td>
+          `;
+          tbody.appendChild(row);
+        }
+      });
+    }
+
+    function loadSubjectDetails(subjects) {
+      const subjectsGrid = document.getElementById('subjectsGrid');
+      subjectsGrid.innerHTML = '';
+      
+      subjects.forEach(subject => {
+        const card = document.createElement('div');
+        card.className = 'subject-card';
+        card.innerHTML = `
+          <div class="subject-name">${subject.name}</div>
+          <div class="subject-marks">${subject.marks}/${subject.totalMarks}</div>
+          <div style="margin-top: 8px;">
+            <span class="performance-indicator ${getPerformanceClass(subject.percentage)}"></span>
+            ${subject.percentage}%
+          </div>
+        `;
+        subjectsGrid.appendChild(card);
+      });
+    }
+
+    function updatePerformanceIndicators() {
+      const attendance = parseInt(document.getElementById('overallAttendance').textContent);
+      const marks = parseInt(document.getElementById('overallMarks').textContent);
+      
+      let status = 'Good';
+      if (attendance >= 90 && marks >= 80) {
+        status = 'Excellent';
+      } else if (attendance < 75 || marks < 60) {
+        status = 'Needs Improvement';
+      }
+      
+      document.getElementById('performanceStatus').textContent = status;
+    }
+
+    function getPerformanceClass(percentage) {
+      if (percentage >= 80) return 'excellent';
+      if (percentage >= 60) return 'good';
+      return 'poor';
+    }
+
+    function createCharts() {
+      // Get real attendance data for the last 7 days
+      const attendanceData = JSON.parse(localStorage.getItem('attendance')) || {};
+      const studentAttendance = attendanceData[currentStudent.class] || {};
+      
+      // Calculate attendance for last 7 days
+      const last7Days = [];
+      const attendancePercentages = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        last7Days.push(dateStr);
+        
+        const dayAttendance = studentAttendance[dateStr] || [];
+        const studentRecord = dayAttendance.find(record => 
+          record.roll === currentStudent.roll || record.rollNumber === currentStudent.roll
+        );
+        
+        if (studentRecord) {
+          attendancePercentages.push(studentRecord.status === 'Present' ? 100 : 0);
+        } else {
+          attendancePercentages.push(0);
+        }
+      }
+      
+      // Attendance Chart
+      const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+      new Chart(attendanceCtx, {
+        type: 'line',
+        data: {
+          labels: last7Days.map(d => d.split('-')[2] + '/' + d.split('-')[1]),
+          datasets: [{
+            label: 'Attendance %',
+            data: attendancePercentages,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+
+      // Get real marks data
+      const marks = JSON.parse(localStorage.getItem('marks')) || {};
+      const studentMarks = marks[currentStudent.roll] || {};
+      const subjectNames = ['English', 'Math', 'Science', 'Social', 'Computer'];
+      const marksData = [];
+      
+      subjectNames.forEach(subject => {
+        const mark = parseFloat(studentMarks[subject.toLowerCase()]);
+        marksData.push(isNaN(mark) ? 0 : mark);
+      });
+
+      // Marks Chart
+      const marksCtx = document.getElementById('marksChart').getContext('2d');
+      new Chart(marksCtx, {
+        type: 'bar',
+        data: {
+          labels: subjectNames,
+          datasets: [{
+            label: 'Marks %',
+            data: marksData,
+            backgroundColor: [
+              'rgba(102, 126, 234, 0.8)',
+              'rgba(118, 75, 162, 0.8)',
+              'rgba(255, 107, 107, 0.8)',
+              'rgba(78, 205, 196, 0.8)',
+              'rgba(255, 193, 7, 0.8)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+    }
+    
+
+    
+    function logout() {
+      sessionStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

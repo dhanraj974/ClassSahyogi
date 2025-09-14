@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ff6b6b 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 25px rgba(30,60,114,0.4);
+    }
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+    }
+    .success {
+      color: #27ae60;
+      margin-top: 10px;
+    }
+    .back-link {
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .admin-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .admin-info h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    .admin-info p {
+      margin: 5px 0;
+      color: #666;
+      font-size: 14px;
+    }
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <div class="logo-text">CS</div>
+    </div>
+    <h2>🔐 Admin Access</h2>
+    <p style="color: #666; margin-bottom: 30px;">Administrative access to manage staff and system settings</p>
+    
+    <form id="adminLoginForm">
+      <input type="text" id="adminUsername" placeholder="Admin Username" required>
+      <input type="password" id="adminPassword" placeholder="Admin Password" required>
+      <button type="submit">Access Admin Panel</button>
+    </form>
+    
+    <div id="message"></div>
+    
+    <div class="warning">
+      <strong>⚠️ Admin Access Only</strong><br>
+      This area is restricted to authorized administrators only.
+    </div>
+    
+    <div class="admin-info">
+      <h4>🔑 Admin Credentials</h4>
+      <p><strong>Username:</strong> admin</p>
+      <p><strong>Password:</strong> admin123</p>
+    </div>
+    
+    <div class="back-link">
+      <a href="index.html">← Back to Teacher Login</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('adminUsername').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
+      const messageDiv = document.getElementById('message');
+      
+      if (!username || !password) {
+        messageDiv.innerHTML = '<div class="error">Please enter both username and password</div>';
+        return;
+      }
+      
+      // Check admin credentials
+      if (username === 'admin' && password === 'admin123') {
+        messageDiv.innerHTML = '<div class="success">Login successful! Redirecting to admin panel...</div>';
+        
+        // Store admin session
+        localStorage.setItem('adminLoggedIn', 'true');
+        localStorage.setItem('adminUser', JSON.stringify({
+          username: 'admin',
+          role: 'Administrator',
+          loginTime: new Date().toISOString()
+        }));
+        
+        // Redirect to admin dashboard
+        setTimeout(() => {
+          window.location.href = 'admin-dashboard.html';
+        }, 1500);
+      } else {
+        messageDiv.innerHTML = '<div class="error">Invalid admin credentials. Access denied.</div>';
+      }
+    });
+
+    // Auto-focus on username input
+    document.getElementById('adminUsername').focus();
+  </script>
+</body>
+</html>

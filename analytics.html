@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics • ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; overflow-x: hidden; }
+    .layout { display: flex; min-height: 100vh; }
+    nav { width: 220px; background: #232946; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 32px 0; }
+    nav a { color: #fff; text-decoration: none; margin: 18px 0; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
+    header { height: 64px; background: rgba(255,255,255,0.95); box-shadow: 0 2px 12px rgba(35,41,70,0.06); display: flex; align-items: center; padding: 0 36px; color: #232946; font-weight: 500; gap: 12px; }
+    .card { background: rgba(255,255,255,0.98); border-radius: 18px; box-shadow: 0 8px 32px rgba(35,41,70,0.10); margin: 32px 48px; padding: 36px 48px; min-height: 80vh; flex: 1; }
+    .chart-container { background: white; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: bold; margin-bottom: 8px; }
+    .analytics-section { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+    button { background: #007bff; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; margin: 4px; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:40px;">
+        <div style="width:180px;height:100px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(30,60,114,0.4);padding:16px;position:relative;overflow:hidden;">
+          <!-- Geometric Background Pattern -->
+          <div style="position:absolute;top:-10px;right:-10px;width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
+          <div style="position:absolute;bottom:-15px;left:-15px;width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;transform:rotate(-30deg);"></div>
+          
+          <!-- Main Logo Icon -->
+          <div style="width:50px;height:50px;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+            <div style="width:30px;height:30px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;">
+              <div style="width:20px;height:20px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                <div style="width:12px;height:12px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:2px;position:relative;">
+                  <div style="position:absolute;top:2px;left:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
+                  <div style="position:absolute;bottom:2px;right:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Brand Text -->
+          <div style="font-size:1.4rem;font-weight:800;color:#fff;text-align:center;line-height:1.1;letter-spacing:2px;text-shadow:0 2px 4px rgba(0,0,0,0.3);">
+            <span style="color:#FFD700;text-shadow:0 0 10px rgba(255,215,0,0.5);">CS</span>
+          </div>
+          <div style="font-size:0.6rem;color:rgba(255,255,255,0.9);font-weight:500;margin-top:2px;letter-spacing:1px;">
+            ClassSahyogi
+          </div>
+        </div>
+      </div>
+      <a href="index.html"><span>🏠</span> Dashboard</a>
+      <a href="enrollment.html"><span>📝</span> Enrollment</a>
+      <a href="fees.html"><span>💰</span> Fees</a>
+      <a href="timetable.html"><span>📅</span> Timetable</a>
+      <a href="staff.html"><span>👥</span> Staff</a>
+      <a href="analytics.html"><span>📊</span> Analytics</a>
+      <a href="attendance.html"><span>🧾</span> Attendance</a>
+      <a href="marks.html"><span>🎓</span> Marks</a>
+    </nav>
+    <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
+      <header>
+        <div style="width:140px;height:45px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;padding:8px;position:relative;overflow:hidden;box-shadow:0 4px 15px rgba(30,60,114,0.3);">
+          <!-- Mini Geometric Pattern -->
+          <div style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
+          
+          <!-- Mini Logo Icon -->
+          <div style="width:25px;height:25px;background:rgba(255,255,255,0.95);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-right:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+            <div style="width:15px;height:15px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:4px;position:relative;">
+              <div style="position:absolute;top:1px;left:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
+              <div style="position:absolute;bottom:1px;right:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
+            </div>
+          </div>
+          
+          <!-- Brand Text -->
+          <div style="font-size:0.9rem;font-weight:800;color:#fff;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,0.3);">
+            <span style="color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,0.4);">CS</span>
+          </div>
+        </div>
+        <span>📊 ClassSahyogi - Performance Analytics</span>
+      </header>
+      <div class="card">
+        <a href="javascript:void(0)" onclick="goToDashboard()" style="display:inline-block; margin-bottom:12px; background:#e5e7eb; color:#111827; padding:8px 14px; border-radius:8px; text-decoration:none;">← Back to Dashboard</a>
+        
+        <!-- Key Metrics -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalStudents">0</div>
+            <div>Total Students</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="avgAttendance">0%</div>
+            <div>Avg Attendance</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalFees">₹0</div>
+            <div>Fees Collected</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="avgMarks">0%</div>
+            <div>Avg Marks</div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="chart-row">
+          <div class="chart-container">
+            <h4>📈 Student Distribution by Class</h4>
+            <canvas id="classChart" width="400" height="200"></canvas>
+          </div>
+          <div class="chart-container">
+            <h4>📊 Attendance Trends</h4>
+            <canvas id="attendanceChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="chart-row">
+          <div class="chart-container">
+            <h4>💰 Fees Collection Status</h4>
+            <canvas id="feesChart" width="400" height="200"></canvas>
+          </div>
+          <div class="chart-container">
+            <h4>🎓 Grade Distribution</h4>
+            <canvas id="gradesChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Performance Analysis -->
+        <div class="analytics-section">
+          <h4 style="margin-top: 0; color: #333;">📋 Detailed Performance Analysis</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+            <div style="background: white; padding: 16px; border-radius: 8px;">
+              <h5>🏆 Top Performing Students</h5>
+              <div id="topStudents"></div>
+            </div>
+            <div style="background: white; padding: 16px; border-radius: 8px;">
+              <h5>📚 Subject-wise Performance</h5>
+              <div id="subjectPerformance"></div>
+            </div>
+            <div style="background: white; padding: 16px; border-radius: 8px;">
+              <h5>⚠️ Students Needing Attention</h5>
+              <div id="attentionStudents"></div>
+            </div>
+            <div style="background: white; padding: 16px; border-radius: 8px;">
+              <h5>📅 Recent Activities</h5>
+              <div id="recentActivities"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Options -->
+        <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 20px; border-radius: 12px; margin-top: 20px;">
+          <h4 style="margin-top: 0; color: #333;">📤 Export Reports</h4>
+          <button onclick="exportStudentReport()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Export Student Report</button>
+          <button onclick="exportAttendanceReport()" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">Export Attendance Report</button>
+          <button onclick="exportFeesReport()" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">Export Fees Report</button>
+          <button onclick="exportFullReport()" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">Export Full Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function goToDashboard() {
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      
+      if (currentUser.role === 'admin') {
+        window.location.href = 'admin-dashboard.html';
+      } else if (currentUser.role === 'teacher') {
+        window.location.href = 'teacher-dashboard.html';
+      } else if (currentUser.role === 'student') {
+        window.location.href = 'student-dashboard.html';
+      } else {
+        // No user logged in, go to main page
+        window.location.href = 'index.html';
+      }
+    }
+
+    let students = JSON.parse(localStorage.getItem('students')) || [];
+    let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+    let marks = JSON.parse(localStorage.getItem('marks')) || {};
+    let feesData = JSON.parse(localStorage.getItem('feesData')) || [];
+
+    function updateMetrics() {
+      // Total students
+      document.getElementById('totalStudents').textContent = students.length;
+
+      // Average attendance
+      let totalAttendance = 0;
+      let totalRecords = 0;
+      Object.values(attendance).forEach(division => {
+        Object.values(division).forEach(dayRecords => {
+          dayRecords.forEach(record => {
+            totalRecords++;
+            if (record.status === 'Present') totalAttendance++;
+          });
+        });
+      });
+      const avgAttendance = totalRecords > 0 ? Math.round((totalAttendance / totalRecords) * 100) : 0;
+      document.getElementById('avgAttendance').textContent = avgAttendance + '%';
+
+      // Total fees collected
+      const totalFees = feesData.filter(f => f.status === 'Paid').reduce((sum, f) => sum + f.amount, 0);
+      document.getElementById('totalFees').textContent = '₹' + totalFees.toLocaleString();
+
+      // Average marks
+      let totalMarks = 0;
+      let markCount = 0;
+      Object.values(marks).forEach(studentMarks => {
+        const subjects = ['english', 'math', 'science', 'social', 'computer'];
+        subjects.forEach(subject => {
+          const mark = parseFloat(studentMarks[subject]);
+          if (!isNaN(mark)) {
+            totalMarks += mark;
+            markCount++;
+          }
+        });
+      });
+      const avgMarks = markCount > 0 ? Math.round(totalMarks / markCount) : 0;
+      document.getElementById('avgMarks').textContent = avgMarks + '%';
+    }
+
+    function createClassChart() {
+      const classCounts = {};
+      students.forEach(s => {
+        classCounts[s.class] = (classCounts[s.class] || 0) + 1;
+      });
+
+      const ctx = document.getElementById('classChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(classCounts),
+          datasets: [{
+            data: Object.values(classCounts),
+            backgroundColor: [
+              '#FF6384',
+              '#36A2EB',
+              '#FFCE56',
+              '#4BC0C0',
+              '#9966FF',
+              '#FF9F40'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    function createAttendanceChart() {
+      const last7Days = [];
+      const attendanceData = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        last7Days.push(dateStr);
+        
+        let present = 0;
+        let total = 0;
+        Object.values(attendance).forEach(division => {
+          if (division[dateStr]) {
+            division[dateStr].forEach(record => {
+              total++;
+              if (record.status === 'Present') present++;
+            });
+          }
+        });
+        attendanceData.push(total > 0 ? Math.round((present / total) * 100) : 0);
+      }
+
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: last7Days.map(d => d.split('-')[2] + '/' + d.split('-')[1]),
+          datasets: [{
+            label: 'Attendance %',
+            data: attendanceData,
+            borderColor: '#36A2EB',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+    }
+
+    function createFeesChart() {
+      const paid = feesData.filter(f => f.status === 'Paid').length;
+      const pending = students.length - paid;
+
+      const ctx = document.getElementById('feesChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Paid', 'Pending'],
+          datasets: [{
+            data: [paid, pending],
+            backgroundColor: ['#4BC0C0', '#FF6384']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    function createGradesChart() {
+      const gradeCounts = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+      
+      Object.values(marks).forEach(studentMarks => {
+        const subjects = ['english', 'math', 'science', 'social', 'computer'];
+        let total = 0;
+        let count = 0;
+        subjects.forEach(subject => {
+          const mark = parseFloat(studentMarks[subject]);
+          if (!isNaN(mark)) {
+            total += mark;
+            count++;
+          }
+        });
+        if (count > 0) {
+          const avg = total / count;
+          if (avg >= 90) gradeCounts.A++;
+          else if (avg >= 80) gradeCounts.B++;
+          else if (avg >= 70) gradeCounts.C++;
+          else if (avg >= 60) gradeCounts.D++;
+          else gradeCounts.F++;
+        }
+      });
+
+      const ctx = document.getElementById('gradesChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(gradeCounts),
+          datasets: [{
+            label: 'Number of Students',
+            data: Object.values(gradeCounts),
+            backgroundColor: ['#4BC0C0', '#36A2EB', '#FFCE56', '#FF9F40', '#FF6384']
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function loadTopStudents() {
+      const studentAverages = [];
+      
+      students.forEach(student => {
+        const studentMarks = marks[student.roll] || {};
+        const subjects = ['english', 'math', 'science', 'social', 'computer'];
+        let total = 0;
+        let count = 0;
+        subjects.forEach(subject => {
+          const mark = parseFloat(studentMarks[subject]);
+          if (!isNaN(mark)) {
+            total += mark;
+            count++;
+          }
+        });
+        if (count > 0) {
+          studentAverages.push({
+            name: student.name,
+            class: student.class,
+            average: Math.round(total / count)
+          });
+        }
+      });
+
+      studentAverages.sort((a, b) => b.average - a.average);
+      const top5 = studentAverages.slice(0, 5);
+
+      document.getElementById('topStudents').innerHTML = top5.map((s, i) => 
+        `<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+          ${i + 1}. ${s.name} (${s.class}) - ${s.average}%
+        </div>`
+      ).join('');
+    }
+
+    function loadSubjectPerformance() {
+      const subjectTotals = { english: 0, math: 0, science: 0, social: 0, computer: 0 };
+      const subjectCounts = { english: 0, math: 0, science: 0, social: 0, computer: 0 };
+
+      Object.values(marks).forEach(studentMarks => {
+        Object.keys(subjectTotals).forEach(subject => {
+          const mark = parseFloat(studentMarks[subject]);
+          if (!isNaN(mark)) {
+            subjectTotals[subject] += mark;
+            subjectCounts[subject]++;
+          }
+        });
+      });
+
+      document.getElementById('subjectPerformance').innerHTML = Object.keys(subjectTotals).map(subject => {
+        const avg = subjectCounts[subject] > 0 ? Math.round(subjectTotals[subject] / subjectCounts[subject]) : 0;
+        return `<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+          <strong>${subject.charAt(0).toUpperCase() + subject.slice(1)}:</strong> ${avg}%
+        </div>`;
+      }).join('');
+    }
+
+    function loadAttentionStudents() {
+      const lowPerformers = [];
+      
+      students.forEach(student => {
+        const studentMarks = marks[student.roll] || {};
+        const subjects = ['english', 'math', 'science', 'social', 'computer'];
+        let total = 0;
+        let count = 0;
+        subjects.forEach(subject => {
+          const mark = parseFloat(studentMarks[subject]);
+          if (!isNaN(mark)) {
+            total += mark;
+            count++;
+          }
+        });
+        if (count > 0) {
+          const avg = total / count;
+          if (avg < 60) {
+            lowPerformers.push({
+              name: student.name,
+              class: student.class,
+              average: Math.round(avg)
+            });
+          }
+        }
+      });
+
+      document.getElementById('attentionStudents').innerHTML = lowPerformers.length > 0 ? 
+        lowPerformers.map(s => 
+          `<div style="margin: 8px 0; padding: 8px; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+            ${s.name} (${s.class}) - ${s.average}%
+          </div>`
+        ).join('') : '<div style="color: #28a745;">No students need immediate attention!</div>';
+    }
+
+    function loadRecentActivities() {
+      const activities = [];
+      
+      // Recent student additions
+      students.slice(-3).forEach(s => {
+        activities.push(`New student ${s.name} added to ${s.class}`);
+      });
+      
+      // Recent fee payments
+      feesData.slice(-3).forEach(f => {
+        activities.push(`Fee payment of ₹${f.amount} received from ${f.studentName}`);
+      });
+
+      activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      document.getElementById('recentActivities').innerHTML = activities.slice(0, 5).map(activity => 
+        `<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem;">
+          ${activity}
+        </div>`
+      ).join('');
+    }
+
+    function exportStudentReport() {
+      const csv = [
+        ['Name', 'Roll', 'Class', 'DOB', 'Contact', 'Course', 'Semester'],
+        ...students.map(s => [s.name, s.roll, s.class, s.dob, s.contact || '', s.course || '', s.semester || ''])
+      ].map(row => row.join(',')).join('\n');
+      
+      downloadCSV(csv, 'student_report.csv');
+    }
+
+    function exportAttendanceReport() {
+      const csv = ['Date,Class,Student,Status'];
+      Object.entries(attendance).forEach(([class_, days]) => {
+        Object.entries(days).forEach(([date, records]) => {
+          records.forEach(record => {
+            csv.push(`${date},${class_},${record.name},${record.status}`);
+          });
+        });
+      });
+      
+      downloadCSV(csv.join('\n'), 'attendance_report.csv');
+    }
+
+    function exportFeesReport() {
+      const csv = [
+        ['Student', 'Class', 'Amount', 'Date', 'Method', 'Status'],
+        ...feesData.map(f => [f.studentName, f.studentClass, f.amount, f.paymentDate, f.method, f.status])
+      ].map(row => row.join(',')).join('\n');
+      
+      downloadCSV(csv, 'fees_report.csv');
+    }
+
+    function exportFullReport() {
+      const report = {
+        students: students.length,
+        totalFees: feesData.filter(f => f.status === 'Paid').reduce((sum, f) => sum + f.amount, 0),
+        avgAttendance: document.getElementById('avgAttendance').textContent,
+        avgMarks: document.getElementById('avgMarks').textContent,
+        generated: new Date().toISOString()
+      };
+      
+      const csv = [
+        ['Metric', 'Value'],
+        ['Total Students', report.students],
+        ['Total Fees Collected', '₹' + report.totalFees.toLocaleString()],
+        ['Average Attendance', report.avgAttendance],
+        ['Average Marks', report.avgMarks],
+        ['Report Generated', report.generated]
+      ].map(row => row.join(',')).join('\n');
+      
+      downloadCSV(csv, 'full_report.csv');
+    }
+
+    function downloadCSV(csv, filename) {
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+    }
+
+    // Initialize
+    updateMetrics();
+    createClassChart();
+    createAttendanceChart();
+    createFeesChart();
+    createGradesChart();
+    loadTopStudents();
+    loadSubjectPerformance();
+    loadAttentionStudents();
+    loadRecentActivities();
+  </script>
+</body>
+</html>

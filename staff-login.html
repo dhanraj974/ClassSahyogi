@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Login - ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ff6b6b 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 25px rgba(30,60,114,0.4);
+    }
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+    }
+    .success {
+      color: #27ae60;
+      margin-top: 10px;
+    }
+    .back-link {
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .staff-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .staff-info h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    .staff-info p {
+      margin: 5px 0;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <div class="logo-text">CS</div>
+    </div>
+    <h2>👥 Staff Portal</h2>
+    <p style="color: #666; margin-bottom: 30px;">Enter your Staff ID to access the system</p>
+    
+    <form id="staffLoginForm">
+      <input type="text" id="staffId" placeholder="Enter your Staff ID" required>
+      <button type="submit">Access System</button>
+    </form>
+    
+    <div id="message"></div>
+    
+    <div class="staff-info">
+      <h4>📋 Staff Information</h4>
+      <p><strong>Name:</strong> <span id="staffName">-</span></p>
+      <p><strong>Department:</strong> <span id="staffDept">-</span></p>
+      <p><strong>Role:</strong> <span id="staffRole">-</span></p>
+    </div>
+    
+    <div class="back-link">
+      <a href="index.html">← Back to Teacher Login</a>
+    </div>
+  </div>
+
+  <script>
+    // Sample staff data (in real system, this would come from database)
+    const staffData = {
+      'STF001': { name: 'Dr. Sarah Johnson', department: 'Mathematics', role: 'Senior Teacher' },
+      'STF002': { name: 'Mr. Michael Chen', department: 'Science', role: 'Lab Assistant' },
+      'STF003': { name: 'Ms. Emily Davis', department: 'English', role: 'Teacher' },
+      'STF004': { name: 'Mr. David Wilson', department: 'Administration', role: 'Office Manager' },
+      'STF005': { name: 'Mrs. Lisa Brown', department: 'Library', role: 'Librarian' }
+    };
+
+    document.getElementById('staffLoginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const staffId = document.getElementById('staffId').value.trim().toUpperCase();
+      const messageDiv = document.getElementById('message');
+      
+      if (!staffId) {
+        messageDiv.innerHTML = '<div class="error">Please enter your Staff ID</div>';
+        return;
+      }
+      
+      // Check if staff exists
+      const staff = staffData[staffId];
+      
+      if (staff) {
+        // Update staff info display
+        document.getElementById('staffName').textContent = staff.name;
+        document.getElementById('staffDept').textContent = staff.department;
+        document.getElementById('staffRole').textContent = staff.role;
+        
+        // Store current staff data
+        localStorage.setItem('currentStaff', JSON.stringify({
+          id: staffId,
+          ...staff
+        }));
+        
+        messageDiv.innerHTML = '<div class="success">Login successful! Redirecting...</div>';
+        
+        // Redirect to staff dashboard
+        setTimeout(() => {
+          window.location.href = 'staff-dashboard.html';
+        }, 1500);
+      } else {
+        messageDiv.innerHTML = '<div class="error">Staff ID not found. Please check your ID or contact administration.</div>';
+        // Clear staff info
+        document.getElementById('staffName').textContent = '-';
+        document.getElementById('staffDept').textContent = '-';
+        document.getElementById('staffRole').textContent = '-';
+      }
+    });
+
+    // Auto-focus on staff ID input
+    document.getElementById('staffId').focus();
+  </script>
+</body>
+</html>

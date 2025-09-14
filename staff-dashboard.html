@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Dashboard - ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ff6b6b 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(30,60,114,0.3);
+    }
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    .logo-text {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .staff-info {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    .back-btn {
+      background: #e5e7eb;
+      color: #111827;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 20px;
+      transition: background 0.3s;
+    }
+    .back-btn:hover {
+      background: #d1d5db;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .feature-card {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+    .feature-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 10px;
+    }
+    .feature-desc {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .access-level {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+    .full-access { background: #d4edda; color: #155724; }
+    .limited-access { background: #fff3cd; color: #856404; }
+    .view-only { background: #d1ecf1; color: #0c5460; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-text">CS</div>
+    </div>
+    <h1>👥 Staff Dashboard</h1>
+    <div class="staff-info" id="staffInfo">
+      <!-- Staff info will be loaded here -->
+    </div>
+  </div>
+
+  <div class="container">
+    <a href="staff-login.html" class="back-btn">← Back to Staff Login</a>
+    
+    <!-- Quick Stats -->
+    <div class="card">
+      <h2>📊 Quick Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalStudents">0</div>
+          <div class="stat-label">Total Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalStaff">0</div>
+          <div class="stat-label">Total Staff</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="todayAttendance">0%</div>
+          <div class="stat-label">Today's Attendance</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="activeClasses">0</div>
+          <div class="stat-label">Active Classes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available Features -->
+    <div class="card">
+      <h2>🔧 Available Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card" onclick="viewStudents()">
+          <div class="feature-icon">👥</div>
+          <div class="feature-title">View Students</div>
+          <div class="feature-desc">Browse student information and records</div>
+          <div class="access-level view-only">View Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="viewAttendance()">
+          <div class="feature-icon">📅</div>
+          <div class="feature-title">Attendance Records</div>
+          <div class="feature-desc">View attendance data and reports</div>
+          <div class="access-level view-only">View Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="viewMarks()">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Academic Records</div>
+          <div class="feature-desc">View student marks and grades</div>
+          <div class="access-level view-only">View Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="viewTimetable()">
+          <div class="feature-icon">⏰</div>
+          <div class="feature-title">Class Schedule</div>
+          <div class="feature-desc">View class timetables and schedules</div>
+          <div class="access-level view-only">View Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="viewFees()">
+          <div class="feature-icon">💰</div>
+          <div class="feature-title">Fees Information</div>
+          <div class="feature-desc">View fee structure and payments</div>
+          <div class="access-level view-only">View Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="viewAnalytics()">
+          <div class="feature-icon">📈</div>
+          <div class="feature-title">Reports & Analytics</div>
+          <div class="feature-desc">View performance reports and statistics</div>
+          <div class="access-level view-only">View Only</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <h2>📋 Recent Activity</h2>
+      <div id="recentActivity">
+        <p style="color: #666; text-align: center; padding: 20px;">No recent activity to display</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStaff = null;
+
+    // Load staff data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      currentStaff = JSON.parse(localStorage.getItem('currentStaff'));
+      
+      if (!currentStaff) {
+        alert('No staff data found. Please login again.');
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      loadStaffData();
+      loadQuickStats();
+    });
+
+    function loadStaffData() {
+      const staffInfo = document.getElementById('staffInfo');
+      staffInfo.innerHTML = `
+        <h3>${currentStaff.name}</h3>
+        <p><strong>Staff ID:</strong> ${currentStaff.id}</p>
+        <p><strong>Department:</strong> ${currentStaff.department}</p>
+        <p><strong>Role:</strong> ${currentStaff.role}</p>
+      `;
+    }
+
+    function loadQuickStats() {
+      // Load student count
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      document.getElementById('totalStudents').textContent = students.length;
+
+      // Load staff count (from staff data)
+      const staffCount = Object.keys({
+        'STF001': { name: 'Dr. Sarah Johnson', department: 'Mathematics', role: 'Senior Teacher' },
+        'STF002': { name: 'Mr. Michael Chen', department: 'Science', role: 'Lab Assistant' },
+        'STF003': { name: 'Ms. Emily Davis', department: 'English', role: 'Teacher' },
+        'STF004': { name: 'Mr. David Wilson', department: 'Administration', role: 'Office Manager' },
+        'STF005': { name: 'Mrs. Lisa Brown', department: 'Library', role: 'Librarian' }
+      }).length;
+      document.getElementById('totalStaff').textContent = staffCount;
+
+      // Calculate today's attendance
+      const attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+      let totalStudents = 0;
+      let presentStudents = 0;
+      const today = new Date().toISOString().slice(0,10);
+      
+      Object.values(attendance).forEach(divisionAttendance => {
+        if (divisionAttendance[today]) {
+          const todayAttendance = divisionAttendance[today];
+          totalStudents += todayAttendance.length;
+          presentStudents += todayAttendance.filter(record => record.status === 'Present').length;
+        }
+      });
+      
+      const attendancePercentage = totalStudents > 0 ? Math.round((presentStudents / totalStudents) * 100) : 0;
+      document.getElementById('todayAttendance').textContent = attendancePercentage + '%';
+
+      // Active classes (simplified)
+      const activeClasses = Object.keys(attendance).length;
+      document.getElementById('activeClasses').textContent = activeClasses;
+    }
+
+    // Feature navigation functions
+    function viewStudents() {
+      window.open('index.html#dashboardOverview', '_blank');
+    }
+
+    function viewAttendance() {
+      window.open('attendance.html', '_blank');
+    }
+
+    function viewMarks() {
+      window.open('marks.html', '_blank');
+    }
+
+    function viewTimetable() {
+      window.open('timetable.html', '_blank');
+    }
+
+    function viewFees() {
+      window.open('fees.html', '_blank');
+    }
+
+    function viewAnalytics() {
+      window.open('analytics.html', '_blank');
+    }
+  </script>
+</body>
+</html>

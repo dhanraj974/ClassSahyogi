@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance • ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <style>
+    html { scroll-behavior: smooth; }
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; overflow-x: hidden; }
+    .layout { display: flex; min-height: 100vh; }
+    nav { width: 220px; background: #232946; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 32px 0; }
+    nav a { color: #fff; text-decoration: none; margin: 18px 0; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
+    header { height: 64px; background: rgba(255,255,255,0.95); box-shadow: 0 2px 12px rgba(35,41,70,0.06); display: flex; align-items: center; padding: 0 20px; color: #232946; font-weight: 500; gap: 12px; }
+    .card { background: rgba(255,255,255,0.98); border-radius: 18px; box-shadow: 0 8px 32px rgba(35,41,70,0.10); margin: 16px; padding: 20px; min-height: calc(100vh - 120px); flex: 1; overflow-y: auto; }
+    button { background: #007bff; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+    select { padding: 6px 12px; border-radius: 6px; border: 1px solid #bbb; }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      nav { width: 100%; height: auto; padding: 16px 0; }
+      nav a { margin: 8px 0; font-size: 1rem; }
+      .card { margin: 8px; padding: 16px; }
+      header { padding: 0 16px; font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:40px;">
+        <div style="width:180px;height:100px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(30,60,114,0.4);padding:16px;position:relative;overflow:hidden;">
+          <!-- Geometric Background Pattern -->
+          <div style="position:absolute;top:-10px;right:-10px;width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
+          <div style="position:absolute;bottom:-15px;left:-15px;width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;transform:rotate(-30deg);"></div>
+          
+          <!-- Main Logo Icon -->
+          <div style="width:50px;height:50px;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+            <div style="width:30px;height:30px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;">
+              <div style="width:20px;height:20px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                <div style="width:12px;height:12px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:2px;position:relative;">
+                  <div style="position:absolute;top:2px;left:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
+                  <div style="position:absolute;bottom:2px;right:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Brand Text -->
+          <div style="font-size:1.4rem;font-weight:800;color:#fff;text-align:center;line-height:1.1;letter-spacing:2px;text-shadow:0 2px 4px rgba(0,0,0,0.3);">
+            <span style="color:#FFD700;text-shadow:0 0 10px rgba(255,215,0,0.5);">CS</span>
+          </div>
+          <div style="font-size:0.6rem;color:rgba(255,255,255,0.9);font-weight:500;margin-top:2px;letter-spacing:1px;">
+            ClassSahyogi
+          </div>
+        </div>
+      </div>
+      <a href="index.html"><span>🏠</span> Dashboard</a>
+      <a href="enrollment.html"><span>📝</span> Enrollment</a>
+      <a href="fees.html"><span>💰</span> Fees</a>
+      <a href="timetable.html"><span>📅</span> Timetable</a>
+      <a href="staff.html"><span>👥</span> Staff</a>
+      <a href="analytics.html"><span>📊</span> Analytics</a>
+      <a href="attendance.html"><span>🧾</span> Attendance</a>
+      <a href="marks.html"><span>🎓</span> Marks</a>
+    </nav>
+    <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
+      <header>
+        <div style="width:140px;height:45px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;padding:8px;position:relative;overflow:hidden;box-shadow:0 4px 15px rgba(30,60,114,0.3);">
+          <!-- Mini Geometric Pattern -->
+          <div style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
+          
+          <!-- Mini Logo Icon -->
+          <div style="width:25px;height:25px;background:rgba(255,255,255,0.95);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-right:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+            <div style="width:15px;height:15px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:4px;position:relative;">
+              <div style="position:absolute;top:1px;left:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
+              <div style="position:absolute;bottom:1px;right:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
+            </div>
+          </div>
+          
+          <!-- Brand Text -->
+          <div style="font-size:0.9rem;font-weight:800;color:#fff;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,0.3);">
+            <span style="color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,0.4);">CS</span>
+          </div>
+        </div>
+        <span>🧾 ClassSahyogi - Attendance</span>
+      </header>
+      <div class="card">
+        <a href="javascript:void(0)" onclick="goToDashboard()" style="display:inline-block; margin-bottom:12px; background:#e5e7eb; color:#111827; padding:8px 14px; border-radius:8px; text-decoration:none;">← Back to Dashboard</a>
+        <h4 style="margin-top:0; color: #333; font-size: 1.5rem;">🧾 Attendance System</h4>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 10px; margin: 20px 0;">
+          <h5 style="color: #4a5568; margin-bottom: 15px;">📊 Quick Stats</h5>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;" id="todayAttendance">0%</div>
+              <div style="font-size: 0.9rem; color: #666;">Today's Attendance</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;" id="totalPresent">0</div>
+              <div style="font-size: 0.9rem; color: #666;">Total Present</div>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="font-size: 1.5rem; font-weight: bold; color: #dc3545;" id="totalAbsent">0</div>
+              <div style="font-size: 0.9rem; color: #666;">Total Absent</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label for="divisionSelect"><strong>Select Division:</strong></label>
+          <select id="divisionSelect" style="margin: 0 0 16px 12px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc;"></select>
+          <div style="margin: 20px 0;">
+            <button onclick="showAttendanceMarking()" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 6px; margin-right: 10px; cursor: pointer;">📝 Mark Today's Attendance</button>
+            <button onclick="showAttendanceRecords()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 6px; margin-right: 10px; cursor: pointer;">📊 View Records</button>
+            <button onclick="exportAttendance()" style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">📤 Export Data</button>
+          </div>
+          <div id="attendanceMarking" style="display:none; margin-top:20px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+          <div id="attendanceRecords" style="display:none; margin-top:20px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check user role and restrict access
+    window.addEventListener('load', function() {
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      
+      if (currentUser.role === 'teacher') {
+        // Hide staff link for teachers
+        const staffLink = document.querySelector('a[href="staff.html"]');
+        if (staffLink) {
+          staffLink.style.display = 'none';
+        }
+      }
+    });
+
+    function goToDashboard() {
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      
+      if (currentUser.role === 'admin') {
+        window.location.href = 'admin-dashboard.html';
+      } else if (currentUser.role === 'teacher') {
+        window.location.href = 'teacher-dashboard.html';
+      } else if (currentUser.role === 'student') {
+        window.location.href = 'student-dashboard.html';
+      } else {
+        // No user logged in, go to main page
+        window.location.href = 'index.html';
+      }
+    }
+
+    function populateDivisionDropdown() {
+      const students = JSON.parse(localStorage.getItem("students")) || [];
+      const select = document.getElementById("divisionSelect");
+      const divisions = Array.from(new Set(students.map(s => s.class))).filter(Boolean);
+      select.innerHTML = divisions.length ? divisions.map(d => `<option value="${d}">${d}</option>`).join("") : '<option value="">No divisions</option>';
+    }
+    function showAttendanceMarking() {
+      const students = JSON.parse(localStorage.getItem("students")) || [];
+      const division = document.getElementById("divisionSelect").value;
+      const container = document.getElementById("attendanceMarking");
+      const recordsDiv = document.getElementById("attendanceRecords");
+      recordsDiv.style.display = "none";
+      const filtered = students.filter(s => s.class === division);
+      if (!division || filtered.length === 0) {
+        container.innerHTML = '<p>No students in this division to mark attendance for.</p>';
+        container.style.display = "block";
+        return;
+      }
+      let html = '<form id="attendanceForm">';
+      filtered.forEach((s, i) => {
+        html += `<div style='margin-bottom:8px;'>
+          <strong>${s.name} (${s.roll})</strong>:
+          <label><input type='radio' name='att_${i}' value='Present' required> Present</label>
+          <label><input type='radio' name='att_${i}' value='Absent'> Absent</label>
+        </div>`;
+      });
+      html += '<button type="submit">Save Attendance</button></form>';
+      container.innerHTML = html;
+      container.style.display = "block";
+      document.getElementById("attendanceForm").onsubmit = function(e) {
+        e.preventDefault();
+        const today = new Date().toISOString().slice(0,10);
+        let attendance = JSON.parse(localStorage.getItem("attendance")) || {};
+        if (!attendance[division]) attendance[division] = {};
+        if (!attendance[division][today]) attendance[division][today] = [];
+        filtered.forEach((s, i) => {
+          const status = document.querySelector(`input[name='att_${i}']:checked`).value;
+          attendance[division][today][i] = { 
+            name: s.name, 
+            roll: s.roll, 
+            rollNumber: s.roll, // Add rollNumber for consistency
+            status: status,
+            subject: 'General', // Add default subject
+            remarks: '' // Add default remarks
+          };
+        });
+        localStorage.setItem("attendance", JSON.stringify(attendance));
+        alert("Attendance saved for today!");
+        container.style.display = "none";
+      };
+    }
+    function showAttendanceRecords() {
+      const attendance = JSON.parse(localStorage.getItem("attendance")) || {};
+      const division = document.getElementById("divisionSelect").value;
+      const container = document.getElementById("attendanceRecords");
+      const markingDiv = document.getElementById("attendanceMarking");
+      markingDiv.style.display = "none";
+      if (!division || !attendance[division] || Object.keys(attendance[division]).length === 0) {
+        container.innerHTML = '<p>No attendance records found for this division.</p>';
+        container.style.display = "block";
+        return;
+      }
+      let html = '';
+      for (const date in attendance[division]) {
+        html += `<div style='margin-bottom:10px;'><strong>${date}</strong><ul style='margin:0; padding-left:18px;'>`;
+        attendance[division][date].forEach(a => {
+          html += `<li>${a.name} (${a.roll}): <span style='color:${a.status==="Present"?"green":"red"}'>${a.status}</span></li>`;
+        });
+        html += '</ul></div>';
+      }
+      container.innerHTML = html;
+      container.style.display = "block";
+    }
+
+    function updateAttendanceStats() {
+      const division = document.getElementById("divisionSelect").value;
+      if (!division || !attendance[division]) {
+        document.getElementById("todayAttendance").textContent = "0%";
+        document.getElementById("totalPresent").textContent = "0";
+        document.getElementById("totalAbsent").textContent = "0";
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0,10);
+      const todayAttendance = attendance[division][today] || [];
+      const totalStudents = todayAttendance.length;
+      const presentStudents = todayAttendance.filter(record => record.status === "Present").length;
+      const absentStudents = totalStudents - presentStudents;
+      const attendancePercentage = totalStudents > 0 ? Math.round((presentStudents / totalStudents) * 100) : 0;
+
+      document.getElementById("todayAttendance").textContent = attendancePercentage + "%";
+      document.getElementById("totalPresent").textContent = presentStudents;
+      document.getElementById("totalAbsent").textContent = absentStudents;
+    }
+
+    function exportAttendance() {
+      const division = document.getElementById("divisionSelect").value;
+      if (!division || !attendance[division]) {
+        alert('No attendance data to export for this division.');
+        return;
+      }
+
+      let csvContent = "Date,Student Name,Roll Number,Status,Remarks\n";
+      for (const date in attendance[division]) {
+        attendance[division][date].forEach(record => {
+          csvContent += `${date},${record.name},${record.roll},${record.status},${record.remarks || ''}\n`;
+        });
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `attendance_${division}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Update stats when division changes
+    document.getElementById("divisionSelect").addEventListener("change", updateAttendanceStats);
+    
+    populateDivisionDropdown();
+    updateAttendanceStats();
+  </script>
+</body>
+</html>
+
+
