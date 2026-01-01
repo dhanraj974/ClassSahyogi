@@ -54,14 +54,15 @@
           </div>
         </div>
       </div>
-      <a href="index.html"><span>🏠</span> Dashboard</a>
+      <a href="javascript:void(0)" onclick="goToDashboard()"><span>🏠</span> Dashboard</a>
       <a href="enrollment.html"><span>📝</span> Enrollment</a>
       <a href="fees.html"><span>💰</span> Fees</a>
       <a href="timetable.html"><span>📅</span> Timetable</a>
       <a href="staff.html"><span>👥</span> Staff</a>
       <a href="analytics.html"><span>📊</span> Analytics</a>
       <a href="attendance.html"><span>🧾</span> Attendance</a>
-      <a href="marks.html"><span>🎓</span> Marks</a>
+      <a href="marks (3).html"><span>🎓</span> Marks</a>
+      <a href="javascript:void(0)" onclick="logout()" style="margin-top: 20px; padding: 12px; background: rgba(220, 53, 69, 0.2); border-radius: 8px; border: 1px solid rgba(220, 53, 69, 0.5);"><span>🚪</span> Logout</a>
     </nav>
     <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
       <header>
@@ -178,7 +179,16 @@
         window.location.href = 'student-dashboard.html';
       } else {
         // No user logged in, go to main page
-        window.location.href = 'index.html';
+        window.location.href = 'index (13).html';
+      }
+    }
+    
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('adminUser');
+        window.location.href = 'index (13).html';
       }
     }
 

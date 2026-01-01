@@ -5,7 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Progress - ClassSahyogi</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Database Integration -->
+  <script src="firebase-config.js"></script>
+  <script src="database.js"></script>
+  <script src="database-sync.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -251,38 +261,145 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Shared Files from Teams -->
+    <div class="card">
+      <h2 style="display: flex; align-items: center; gap: 10px;">
+        <span>💼</span> Shared Files from Microsoft Teams
+        <button onclick="window.location.href='teams-integration.html'" style="margin-left: auto; background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          <i class="fas fa-external-link-alt"></i> View All Files
+        </button>
+      </h2>
+      <div id="sharedFilesSection" style="margin-top: 20px;">
+        <!-- Shared files will be loaded here -->
+      </div>
+    </div>
+
+    <!-- College ID Card with QR Code -->
+    <div class="card">
+      <h2 style="display: flex; align-items: center; gap: 10px;">
+        <span>🆔</span> My College ID Card
+        <button onclick="openQRScanner()" style="margin-left: auto; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          <i class="fas fa-qrcode"></i> Scan QR Code
+        </button>
+        <button onclick="downloadIDCard()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          <i class="fas fa-download"></i> Download ID
+        </button>
+      </h2>
+      <div id="idCardSection" style="margin-top: 20px;">
+        <!-- ID Card will be loaded here -->
+      </div>
+    </div>
   </div>
 
-  <script src="common.js"></script>
+  <!-- QR Scanner Modal -->
+  <div id="qrScannerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; text-align: center;">
+      <h2 style="margin-bottom: 20px;">📷 QR Code Scanner</h2>
+      <div style="position: relative; margin-bottom: 20px;">
+        <video id="qrVideo" style="width: 100%; border-radius: 10px; background: #000;" autoplay playsinline></video>
+        <canvas id="qrCanvas" style="display: none;"></canvas>
+        <div id="qrOverlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border: 3px solid #28a745; border-radius: 10px; pointer-events: none;"></div>
+      </div>
+      <div id="qrResult" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; display: none;">
+        <strong>Scanned:</strong> <span id="qrScannedText"></span>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button onclick="closeQRScanner()" style="background: #dc3545; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          Close
+        </button>
+        <button onclick="startQRScan()" id="startScanBtn" style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          Start Scan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let currentStudent = null;
     let attendanceData = {};
     let marksData = {};
 
     // Load student data on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
       // Get current user from session storage
       const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
       
       if (currentUser.role !== 'student') {
         alert('Access denied! This page is for students only.');
-        window.location.href = 'index.html';
+        window.location.href = 'index (13).html';
         return;
       }
       
+      // Try to load data from cloud first (for cross-device access)
+      if (typeof databaseSync !== 'undefined') {
+        try {
+          await databaseSync.loadFromCloud();
+        } catch (error) {
+          console.log('Cloud sync failed, using local data:', error);
+        }
+      }
+      
       // Find student data from localStorage using the roll number
-      const students = JSON.parse(localStorage.getItem('students') || '[]');
+      let students = JSON.parse(localStorage.getItem('students') || '[]');
+      currentStudent = students.find(s => s.roll === currentUser.id);
+      
+      // If not found, wait a bit and try again (in case data is still syncing)
+      if (!currentStudent) {
+        // Wait for sync and retry
+        let retries = 0;
+        const maxRetries = 5;
+        
+        while (!currentStudent && retries < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+          
+          // Reload students data
+          students = JSON.parse(localStorage.getItem('students') || '[]');
+          currentStudent = students.find(s => s.roll === currentUser.id);
+          retries++;
+        }
+        
+        // If still not found after retries, show helpful message
+        if (!currentStudent) {
+          const errorMsg = `Student data not found for ID: ${currentUser.id}\n\n` +
+            `This might happen if:\n` +
+            `1. Data hasn't synced from cloud yet - Please wait and refresh\n` +
+            `2. Student record doesn't exist - Please contact administrator\n` +
+            `3. You're using a different device - Make sure data is synced\n\n` +
+            `Click OK to try syncing data manually.`;
+          
+          if (confirm(errorMsg)) {
+            // Try manual sync
+            if (typeof databaseSync !== 'undefined') {
+              await databaseSync.syncToCloud();
+              await databaseSync.loadFromCloud();
+              
+              // Try one more time
+              students = JSON.parse(localStorage.getItem('students') || '[]');
       currentStudent = students.find(s => s.roll === currentUser.id);
       
       if (!currentStudent) {
-        alert('Student data not found. Please contact administrator.');
-        window.location.href = 'index.html';
+                alert('Still not found. Please contact administrator or try logging in again.');
+                window.location.href = 'index (13).html';
+                return;
+              }
+            } else {
+              alert('Please contact administrator. Student record not found.');
+              window.location.href = 'index (13).html';
+              return;
+            }
+          } else {
+            window.location.href = 'index (13).html';
         return;
+          }
+        }
       }
 
       loadStudentData();
       loadAttendanceData();
       loadMarksData();
+      loadSharedFiles();
+      loadIDCard();
       updatePerformanceIndicators();
       createCharts();
     });
@@ -374,12 +491,9 @@
       let presentDays = 0;
       
       Object.values(studentAttendance).forEach(dayAttendance => {
-        const studentRecord = dayAttendance.find(record => 
-          record.roll === currentStudent.roll || record.rollNumber === currentStudent.roll
-        );
-        if (studentRecord) {
+        if (dayAttendance[currentStudent.roll]) {
           totalDays++;
-          if (studentRecord.status === 'Present' || studentRecord.status === 'present') {
+          if (dayAttendance[currentStudent.roll].status === 'present') {
             presentDays++;
           }
         }
@@ -395,50 +509,27 @@
 
     function loadMarksData() {
       const marks = JSON.parse(localStorage.getItem('marks')) || {};
+      const studentMarks = marks[currentStudent.class] || {};
       
-      // Calculate overall marks - check both class-based and roll-based structures
+      // Calculate overall marks
       let totalMarks = 0;
       let totalSubjects = 0;
       let subjects = [];
       
-      // First try class-based structure
-      const classMarks = marks[currentStudent.class] || {};
-      Object.entries(classMarks).forEach(([subject, subjectMarks]) => {
-        const studentMark = subjectMarks.find(record => 
-          record.rollNumber === currentStudent.roll || record.roll === currentStudent.roll
-        );
-        if (studentMark && studentMark.marks) {
-          const percentage = Math.round((studentMark.marks / (studentMark.totalMarks || 100)) * 100);
+      Object.entries(studentMarks).forEach(([subject, subjectMarks]) => {
+        if (subjectMarks[currentStudent.roll]) {
+          const studentMark = subjectMarks[currentStudent.roll];
+          const percentage = Math.round((studentMark.marks / studentMark.totalMarks) * 100);
           totalMarks += percentage;
           totalSubjects++;
           subjects.push({
             name: subject,
             marks: studentMark.marks,
-            totalMarks: studentMark.totalMarks || 100,
+            totalMarks: studentMark.totalMarks,
             percentage: percentage
           });
         }
       });
-      
-      // If no class-based marks found, try roll-based structure
-      if (totalSubjects === 0) {
-        const studentMarks = marks[currentStudent.roll] || {};
-        const subjectNames = ['english', 'math', 'science', 'social', 'computer'];
-        
-        subjectNames.forEach(subject => {
-          const mark = parseFloat(studentMarks[subject]);
-          if (!isNaN(mark)) {
-            totalMarks += mark;
-            totalSubjects++;
-            subjects.push({
-              name: subject.charAt(0).toUpperCase() + subject.slice(1),
-              marks: mark,
-              totalMarks: 100,
-              percentage: mark
-            });
-          }
-        });
-      }
       
       const overallPercentage = totalSubjects > 0 ? Math.round(totalMarks / totalSubjects) : 0;
       
@@ -459,16 +550,14 @@
         .slice(0, 10);
       
       recentRecords.forEach(([date, dayAttendance]) => {
-        const studentRecord = dayAttendance.find(record => 
-          record.roll === currentStudent.roll || record.rollNumber === currentStudent.roll
-        );
-        if (studentRecord) {
+        if (dayAttendance[currentStudent.roll]) {
+          const record = dayAttendance[currentStudent.roll];
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${new Date(date).toLocaleDateString()}</td>
-            <td>${studentRecord.subject || 'General'}</td>
-            <td><span class="attendance-status ${studentRecord.status.toLowerCase()}">${studentRecord.status.toUpperCase()}</span></td>
-            <td>${studentRecord.remarks || '-'}</td>
+            <td>${record.subject || 'General'}</td>
+            <td><span class="attendance-status ${record.status}">${record.status.toUpperCase()}</span></td>
+            <td>${record.remarks || '-'}</td>
           `;
           tbody.appendChild(row);
         }
@@ -515,41 +604,15 @@
     }
 
     function createCharts() {
-      // Get real attendance data for the last 7 days
-      const attendanceData = JSON.parse(localStorage.getItem('attendance')) || {};
-      const studentAttendance = attendanceData[currentStudent.class] || {};
-      
-      // Calculate attendance for last 7 days
-      const last7Days = [];
-      const attendancePercentages = [];
-      
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
-        last7Days.push(dateStr);
-        
-        const dayAttendance = studentAttendance[dateStr] || [];
-        const studentRecord = dayAttendance.find(record => 
-          record.roll === currentStudent.roll || record.rollNumber === currentStudent.roll
-        );
-        
-        if (studentRecord) {
-          attendancePercentages.push(studentRecord.status === 'Present' ? 100 : 0);
-        } else {
-          attendancePercentages.push(0);
-        }
-      }
-      
       // Attendance Chart
       const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
       new Chart(attendanceCtx, {
         type: 'line',
         data: {
-          labels: last7Days.map(d => d.split('-')[2] + '/' + d.split('-')[1]),
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
           datasets: [{
             label: 'Attendance %',
-            data: attendancePercentages,
+            data: [85, 90, 88, 92],
             borderColor: '#667eea',
             backgroundColor: 'rgba(102, 126, 234, 0.1)',
             tension: 0.4
@@ -567,32 +630,20 @@
         }
       });
 
-      // Get real marks data
-      const marks = JSON.parse(localStorage.getItem('marks')) || {};
-      const studentMarks = marks[currentStudent.roll] || {};
-      const subjectNames = ['English', 'Math', 'Science', 'Social', 'Computer'];
-      const marksData = [];
-      
-      subjectNames.forEach(subject => {
-        const mark = parseFloat(studentMarks[subject.toLowerCase()]);
-        marksData.push(isNaN(mark) ? 0 : mark);
-      });
-
       // Marks Chart
       const marksCtx = document.getElementById('marksChart').getContext('2d');
       new Chart(marksCtx, {
         type: 'bar',
         data: {
-          labels: subjectNames,
+          labels: ['Math', 'Science', 'English', 'History'],
           datasets: [{
             label: 'Marks %',
-            data: marksData,
+            data: [85, 78, 92, 88],
             backgroundColor: [
               'rgba(102, 126, 234, 0.8)',
               'rgba(118, 75, 162, 0.8)',
               'rgba(255, 107, 107, 0.8)',
-              'rgba(78, 205, 196, 0.8)',
-              'rgba(255, 193, 7, 0.8)'
+              'rgba(78, 205, 196, 0.8)'
             ]
           }]
         },
@@ -609,11 +660,445 @@
       });
     }
     
-
+    function loadSharedFiles() {
+      const sharedFilesSection = document.getElementById('sharedFilesSection');
+      const files = JSON.parse(localStorage.getItem('teamsFiles') || '[]');
+      const sharedFiles = files.filter(f => f.shared && f.sharedWith.includes(currentStudent.roll));
+      
+      if (sharedFiles.length === 0) {
+        sharedFilesSection.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #666;">
+            <div style="font-size: 3rem; margin-bottom: 15px;">📁</div>
+            <h3>No shared files yet</h3>
+            <p>Your teachers haven't shared any files with you yet.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      let filesHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">';
+      
+      sharedFiles.forEach(file => {
+        const fileIcon = getFileIcon(file.type, file.name);
+        const fileSize = formatFileSize(file.size);
+        const shareDate = new Date(file.sharedAt || file.uploadedAt).toLocaleDateString();
+        
+        filesHTML += `
+          <div style="background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;" 
+               onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';"
+               onmouseout="this.style.transform=''; this.style.boxShadow='';"
+               onclick="downloadSharedFile(${file.id})">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 15px;">
+              ${fileIcon}
+            </div>
+            <div style="font-weight: 600; color: #333; margin-bottom: 8px; word-break: break-word;">${file.name}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">📊 ${fileSize}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">📅 ${shareDate}</div>
+            <button style="width: 100%; background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+              <i class="fas fa-download"></i> Download
+            </button>
+          </div>
+        `;
+      });
+      
+      filesHTML += '</div>';
+      sharedFilesSection.innerHTML = filesHTML;
+    }
+    
+    function getFileIcon(type, name) {
+      if (type && type.includes('pdf')) return '📄';
+      if (type && (type.includes('word') || name.endsWith('.docx') || name.endsWith('.doc'))) return '📝';
+      if (type && (type.includes('powerpoint') || name.endsWith('.pptx') || name.endsWith('.ppt'))) return '📊';
+      if (type && (type.includes('excel') || name.endsWith('.xlsx') || name.endsWith('.xls'))) return '📈';
+      if (type && type.includes('image')) return '🖼️';
+      if (type && type.includes('video')) return '🎥';
+      if (type && type.includes('audio')) return '🎵';
+      if (name.endsWith('.pdf')) return '📄';
+      if (name.endsWith('.docx') || name.endsWith('.doc')) return '📝';
+      if (name.endsWith('.pptx') || name.endsWith('.ppt')) return '📊';
+      if (name.endsWith('.xlsx') || name.endsWith('.xls')) return '📈';
+      return '📁';
+    }
+    
+    function formatFileSize(bytes) {
+      if (!bytes || bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    function downloadSharedFile(fileId) {
+      const files = JSON.parse(localStorage.getItem('teamsFiles') || '[]');
+      const file = files.find(f => f.id === fileId);
+      
+      if (!file) {
+        alert('File not found!');
+        return;
+      }
+      
+      const link = document.createElement('a');
+      link.href = file.data;
+      link.download = file.name;
+      link.click();
+    }
+    
+    function loadIDCard() {
+      if (!currentStudent) return;
+      
+      const idCardSection = document.getElementById('idCardSection');
+      const studentData = {
+        name: currentStudent.name,
+        roll: currentStudent.roll,
+        class: currentStudent.class,
+        section: currentStudent.section || '',
+        course: currentStudent.course || 'General',
+        contact: currentStudent.contact || 'N/A',
+        photo: currentStudent.photo || ''
+      };
+      
+      // Generate QR code data
+      const qrData = JSON.stringify({
+        studentId: studentData.roll,
+        name: studentData.name,
+        class: studentData.class,
+        section: studentData.section,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Create ID card HTML
+      let idCardHTML = `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 30px; color: white; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+          <div style="display: flex; gap: 30px; align-items: center;">
+            <div style="flex-shrink: 0;">
+              ${studentData.photo ? 
+                `<img src="${studentData.photo}" alt="Student Photo" style="width: 120px; height: 120px; border-radius: 15px; border: 4px solid white; object-fit: cover;">` : 
+                `<div style="width: 120px; height: 120px; border-radius: 15px; border: 4px solid white; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 3rem;">👤</div>`
+              }
+            </div>
+            <div style="flex: 1;">
+              <h2 style="margin: 0 0 10px 0; font-size: 1.8rem;">${studentData.name}</h2>
+              <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <div style="margin-bottom: 8px;"><strong>Roll Number:</strong> ${studentData.roll}</div>
+                <div style="margin-bottom: 8px;"><strong>Class:</strong> ${studentData.class} ${studentData.section}</div>
+                <div style="margin-bottom: 8px;"><strong>Course:</strong> ${studentData.course}</div>
+                <div><strong>Contact:</strong> ${studentData.contact}</div>
+              </div>
+              <div style="text-align: center; font-size: 0.9rem; opacity: 0.9;">
+                ClassSahyogi School Management System
+              </div>
+            </div>
+            <div style="flex-shrink: 0;">
+              <div id="qrCodeContainer" style="background: white; padding: 15px; border-radius: 10px; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
+                <!-- QR Code will be generated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      idCardSection.innerHTML = idCardHTML;
+      
+      // Generate QR Code - use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        const qrContainer = document.getElementById('qrCodeContainer');
+        if (!qrContainer) {
+          console.error('QR Code container not found');
+          return;
+        }
+        
+        // Clear container
+        qrContainer.innerHTML = '<div style="text-align: center; color: #666; font-size: 0.7rem; padding: 5px;">Generating...</div>';
+        
+        // Function to generate QR code - try multiple reliable methods
+        const generateQR = () => {
+          // Method 1: Try QRCode.toDataURL (most reliable from qrcode library)
+          if (typeof QRCode !== 'undefined' && typeof QRCode.toDataURL === 'function') {
+            QRCode.toDataURL(qrData, {
+              width: 120,
+              margin: 1,
+              color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+              },
+              errorCorrectionLevel: 'M'
+            }, function(error, url) {
+              if (error) {
+                console.error('QRCode.toDataURL error:', error);
+                tryMethod2();
+              } else {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Student QR Code';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.maxWidth = '120px';
+                img.style.maxHeight = '120px';
+                img.style.objectFit = 'contain';
+                qrContainer.innerHTML = '';
+                qrContainer.appendChild(img);
+              }
+            });
+            return;
+          }
+          
+          // Method 2: Try QRCode constructor (qrcodejs library)
+          if (typeof QRCode !== 'undefined' && typeof QRCode.CorrectLevel !== 'undefined') {
+            try {
+              qrContainer.innerHTML = '';
+              new QRCode(qrContainer, {
+                text: qrData,
+                width: 120,
+                height: 120,
+                colorDark: '#000000',
+                colorLight: '#FFFFFF',
+                correctLevel: QRCode.CorrectLevel.M
+              });
+              return;
+            } catch (error) {
+              console.error('QRCode constructor error:', error);
+              tryMethod3();
+            }
+          } else {
+            tryMethod3();
+          }
+        };
+        
+        // Method 2: Try QRCode.toCanvas
+        const tryMethod2 = () => {
+          if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
+            const canvas = document.createElement('canvas');
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.maxWidth = '120px';
+            canvas.style.maxHeight = '120px';
+            
+            QRCode.toCanvas(canvas, qrData, {
+              width: 120,
+              margin: 1,
+              color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+              },
+              errorCorrectionLevel: 'M'
+            }, function(error) {
+              if (error) {
+                console.error('QRCode.toCanvas error:', error);
+                tryMethod3();
+              } else {
+                qrContainer.innerHTML = '';
+                qrContainer.appendChild(canvas);
+              }
+            });
+          } else {
+            tryMethod3();
+          }
+        };
+        
+        // Method 3: Use online QR code API as reliable fallback
+        const tryMethod3 = () => {
+          const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrData)}`;
+          const img = document.createElement('img');
+          img.src = qrApiUrl;
+          img.alt = 'Student QR Code';
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.maxWidth = '120px';
+          img.style.maxHeight = '120px';
+          img.style.objectFit = 'contain';
+          img.onload = function() {
+            qrContainer.innerHTML = '';
+            qrContainer.appendChild(img);
+          };
+          img.onerror = function() {
+            qrContainer.innerHTML = '<div style="text-align: center; color: #dc3545; font-size: 0.7rem; padding: 5px;">QR Error<br>Please Refresh</div>';
+          };
+          qrContainer.innerHTML = '<div style="text-align: center; color: #666; font-size: 0.7rem; padding: 5px;">Loading QR...</div>';
+          qrContainer.appendChild(img);
+        };
+        
+        // Wait for library to load, then generate
+        if (typeof QRCode === 'undefined') {
+          let retries = 0;
+          const maxRetries = 15;
+          const checkLibrary = setInterval(() => {
+            retries++;
+            if (typeof QRCode !== 'undefined') {
+              clearInterval(checkLibrary);
+              generateQR();
+            } else if (retries >= maxRetries) {
+              clearInterval(checkLibrary);
+              console.warn('QRCode library not loaded, using online API');
+              tryMethod3();
+            }
+          }, 200);
+        } else {
+          generateQR();
+        }
+      }, 200);
+    }
+    
+    function openQRScanner() {
+      document.getElementById('qrScannerModal').style.display = 'flex';
+      startQRScan();
+    }
+    
+    function closeQRScanner() {
+      document.getElementById('qrScannerModal').style.display = 'none';
+      stopQRScan();
+    }
+    
+    let qrStream = null;
+    let qrScanInterval = null;
+    
+    function startQRScan() {
+      const video = document.getElementById('qrVideo');
+      const canvas = document.getElementById('qrCanvas');
+      const context = canvas.getContext('2d');
+      
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function(stream) {
+          qrStream = stream;
+          video.srcObject = stream;
+          video.setAttribute('playsinline', true);
+          video.play();
+          
+          qrScanInterval = setInterval(() => {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+              canvas.height = video.videoHeight;
+              canvas.width = video.videoWidth;
+              context.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+              
+              if (typeof jsQR !== 'undefined') {
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                  handleQRScanResult(code.data);
+                }
+              } else {
+                // Fallback: show manual input option
+                document.getElementById('qrResult').style.display = 'block';
+                document.getElementById('qrScannedText').textContent = 'QR Scanner library loading... Please use manual input.';
+              }
+            }
+          }, 100);
+        })
+        .catch(function(err) {
+          console.error('Error accessing camera:', err);
+          alert('Unable to access camera. Please ensure you have granted camera permissions.');
+          document.getElementById('qrResult').style.display = 'block';
+          document.getElementById('qrScannedText').textContent = 'Camera access denied. Please check permissions.';
+        });
+    }
+    
+    function stopQRScan() {
+      if (qrStream) {
+        qrStream.getTracks().forEach(track => track.stop());
+        qrStream = null;
+      }
+      if (qrScanInterval) {
+        clearInterval(qrScanInterval);
+        qrScanInterval = null;
+      }
+      const video = document.getElementById('qrVideo');
+      if (video.srcObject) {
+        video.srcObject = null;
+      }
+    }
+    
+    function handleQRScanResult(data) {
+      try {
+        const qrData = JSON.parse(data);
+        
+        // Verify if it's a valid student ID
+        if (qrData.studentId === currentStudent.roll) {
+          document.getElementById('qrResult').style.display = 'block';
+          document.getElementById('qrScannedText').innerHTML = `
+            <div style="color: #28a745; font-weight: 600;">✓ Valid Student ID</div>
+            <div style="margin-top: 10px;">
+              <div><strong>Name:</strong> ${qrData.name}</div>
+              <div><strong>Roll:</strong> ${qrData.studentId}</div>
+              <div><strong>Class:</strong> ${qrData.class} ${qrData.section || ''}</div>
+            </div>
+          `;
+          
+          // Stop scanning after successful scan
+          setTimeout(() => {
+            closeQRScanner();
+          }, 3000);
+        } else {
+          document.getElementById('qrResult').style.display = 'block';
+          document.getElementById('qrScannedText').innerHTML = `
+            <div style="color: #dc3545; font-weight: 600;">✗ Invalid Student ID</div>
+            <div style="margin-top: 10px;">This QR code does not match your student ID.</div>
+          `;
+        }
+      } catch (e) {
+        // If not JSON, check if it's a direct roll number
+        if (data === currentStudent.roll) {
+          document.getElementById('qrResult').style.display = 'block';
+          document.getElementById('qrScannedText').innerHTML = `
+            <div style="color: #28a745; font-weight: 600;">✓ Valid Student ID</div>
+            <div style="margin-top: 10px;">Roll Number: ${data}</div>
+          `;
+          setTimeout(() => {
+            closeQRScanner();
+          }, 3000);
+        } else {
+          document.getElementById('qrResult').style.display = 'block';
+          document.getElementById('qrScannedText').textContent = `Scanned: ${data}`;
+        }
+      }
+    }
+    
+    function downloadIDCard() {
+      if (!currentStudent) return;
+      
+      // Create a canvas for the ID card
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 800;
+      canvas.height = 500;
+      
+      // Draw background
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw white rounded rectangle
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath();
+      ctx.roundRect(50, 50, canvas.width - 100, canvas.height - 100, 20);
+      ctx.fill();
+      
+      // Draw text
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 48px Inter';
+      ctx.fillText(currentStudent.name, 200, 150);
+      
+      ctx.font = '24px Inter';
+      ctx.fillText(`Roll Number: ${currentStudent.roll}`, 200, 220);
+      ctx.fillText(`Class: ${currentStudent.class} ${currentStudent.section || ''}`, 200, 260);
+      ctx.fillText(`Course: ${currentStudent.course || 'General'}`, 200, 300);
+      
+      // Convert to image and download
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Student_ID_${currentStudent.roll}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
     
     function logout() {
       sessionStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
+      window.location.href = 'index (13).html';
     }
   </script>
 </body>

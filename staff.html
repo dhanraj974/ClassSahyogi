@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Staff Management • ClassSahyogi</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Database Integration -->
+  <script src="firebase-config.js"></script>
+  <script src="database.js"></script>
+  <script src="database-sync.js"></script>
+  <script src="unique-id-generator.js"></script>
   <style>
     html { scroll-behavior: smooth; }
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -58,14 +67,15 @@
           </div>
         </div>
       </div>
-      <a href="index.html"><span>🏠</span> Dashboard</a>
+      <a href="javascript:void(0)" onclick="goToDashboard()"><span>🏠</span> Dashboard</a>
       <a href="enrollment.html"><span>📝</span> Enrollment</a>
       <a href="fees.html"><span>💰</span> Fees</a>
       <a href="timetable.html"><span>📅</span> Timetable</a>
       <a href="staff.html"><span>👥</span> Staff</a>
       <a href="analytics.html"><span>📊</span> Analytics</a>
       <a href="attendance.html"><span>🧾</span> Attendance</a>
-      <a href="marks.html"><span>🎓</span> Marks</a>
+      <a href="marks (3).html"><span>🎓</span> Marks</a>
+      <a href="javascript:void(0)" onclick="logout()" style="margin-top: 20px; padding: 12px; background: rgba(220, 53, 69, 0.2); border-radius: 8px; border: 1px solid rgba(220, 53, 69, 0.5);"><span>🚪</span> Logout</a>
     </nav>
     <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
       <header>
@@ -116,9 +126,14 @@
           <h4 style="margin-top: 0; color: #333;">👤 Add Staff Member</h4>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
             <input type="text" id="staffName" placeholder="Full Name" required>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <input type="text" id="staffId" placeholder="Staff ID" readonly style="background: #f8f9fa; color: #6c757d;">
-              <button type="button" onclick="generateStaffId()" style="background: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; font-size: 0.9rem;">Generate ID</button>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <input type="text" id="staffId" placeholder="7-Character ID (Auto-generated from Name & Join Date)" readonly style="background: #f8f9fa; color: #6c757d; max-width: 200px;">
+              <button type="button" onclick="generateStaffId()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; font-size: 0.9rem; font-weight: 600;">
+                <i class="fas fa-key"></i> Generate ID
+              </button>
+            </div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 5px; grid-column: 1 / -1;">
+              <i class="fas fa-info-circle"></i> 7-character ID: First 3 letters of name + Day + Month from join date (e.g., JOH1205)
             </div>
             <select id="staffRole" required>
               <option value="">Select Role</option>
@@ -168,13 +183,12 @@
   </div>
 
   <script>
-    // Check admin access - check both sessionStorage and localStorage for consistency
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    // Check admin access
     const adminLoggedIn = localStorage.getItem('adminLoggedIn');
-    
-    if ((!currentUser || currentUser.role !== 'admin') && (!adminLoggedIn || adminLoggedIn !== 'true')) {
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    if ((!adminLoggedIn || adminLoggedIn !== 'true') && currentUser.role !== 'admin') {
       alert('Access denied. This page requires administrator privileges.');
-      window.location.href = 'index.html';
+      window.location.href = 'index (13).html';
     }
 
     function goToDashboard() {
@@ -188,42 +202,62 @@
         window.location.href = 'student-dashboard.html';
       } else {
         // No user logged in, go to main page
-        window.location.href = 'index.html';
+        window.location.href = 'index (13).html';
+      }
+    }
+    
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('adminUser');
+        window.location.href = 'index (13).html';
       }
     }
 
     let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
 
-    // Generate unique Staff ID
+    // Generate unique Staff ID using name and join date (same as student ID system)
     function generateStaffId() {
+      const name = document.getElementById('staffName').value.trim();
+      const joinDate = document.getElementById('joinDate').value;
       const messageDiv = document.getElementById('staffIdMessage');
       const staffIdInput = document.getElementById('staffId');
       
-      // Get the next available staff number
-      const existingIds = staffData.map(staff => staff.staffId).filter(id => id && id.startsWith('STF'));
-      let nextNumber = 1;
+      if (!name || !joinDate) {
+        alert('Please enter staff name and join date first to generate ID.');
+        if (!name) document.getElementById('staffName').focus();
+        else if (!joinDate) document.getElementById('joinDate').focus();
+        return;
+      }
       
-      // Find the highest existing number
-      existingIds.forEach(id => {
-        const match = id.match(/STF(\d+)/);
-        if (match) {
-          const num = parseInt(match[1]);
-          if (num >= nextNumber) {
-            nextNumber = num + 1;
+      try {
+        // Use name-based ID generator (same as students)
+        if (typeof idGenerator !== 'undefined') {
+          const newId = idGenerator.generateUniqueNameBasedID(name, joinDate, 'staffData', 'staffId', '');
+          staffIdInput.value = newId;
+        } else {
+          // Fallback generation using name and join date
+          const existingIds = staffData.map(staff => staff.staffId).filter(Boolean);
+          const existing = new Set(existingIds);
+          
+          const cleanName = name.replace(/\s+/g, '').toUpperCase().substring(0, 3);
+          const date = new Date(joinDate);
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          
+          let baseID = cleanName + day + month;
+          let finalID = baseID;
+          let attempts = 0;
+          
+          while (existing.has(finalID) && attempts < 100) {
+            attempts++;
+            const lastDigit = parseInt(finalID.charAt(6));
+            const newLastDigit = ((lastDigit + attempts) % 10).toString();
+            finalID = baseID.substring(0, 6) + newLastDigit;
           }
-        }
-      });
-      
-      // Generate new ID with padding (e.g., STF001, STF002, etc.)
-      const newId = `STF${nextNumber.toString().padStart(3, '0')}`;
-      
-      // Check if ID already exists (extra safety)
-      if (existingIds.includes(newId)) {
-        nextNumber++;
-        const finalId = `STF${nextNumber.toString().padStart(3, '0')}`;
-        staffIdInput.value = finalId;
-      } else {
-        staffIdInput.value = newId;
+          
+          staffIdInput.value = finalID.substring(0, 7).toUpperCase();
       }
       
       // Show success message
@@ -235,21 +269,32 @@
       messageDiv.innerHTML = `
         ✅ Generated Staff ID: <strong>${staffIdInput.value}</strong><br>
         🔑 Login Password: <strong>${password}</strong><br>
-        <small>Note: Teacher can use this ID and password to login</small>
-      `;
-      
-      // Auto-hide message after 3 seconds
+          <small style="color: #666;">7-character ID based on name and join date.</small>
+        `;
+        
+        // Highlight the input
+        staffIdInput.style.border = '2px solid #28a745';
+        staffIdInput.style.background = '#f0fff4';
+        setTimeout(() => {
+          staffIdInput.style.border = '';
+          staffIdInput.style.background = '';
+        }, 2000);
+        
+        // Auto-hide message after 5 seconds
       setTimeout(() => {
         messageDiv.style.display = 'none';
-      }, 3000);
+        }, 5000);
+      } catch (error) {
+        console.error('Error generating ID:', error);
+        alert('Error generating staff ID. Please ensure name and join date are entered correctly.');
+      }
     }
 
     // Auto-generate Staff ID when page loads
     function autoGenerateStaffId() {
-      const staffIdInput = document.getElementById('staffId');
-      if (!staffIdInput.value) {
-        generateStaffId();
-      }
+      // Note: ID will be generated when user enters name and join date
+      // This function is kept for backward compatibility but won't auto-generate
+      // without name and join date
     }
 
     // Clear form after successful addition
@@ -266,15 +311,12 @@
       document.getElementById('qualification').value = '';
       document.getElementById('staffPhoto').value = '';
       
-      // Auto-generate new ID for next staff member
-      setTimeout(() => {
-        generateStaffId();
-      }, 500);
+      // Note: ID will be generated when user enters name and join date for next staff member
     }
 
     function addStaff() {
       const name = document.getElementById('staffName').value.trim();
-      const staffId = document.getElementById('staffId').value.trim();
+      let staffId = document.getElementById('staffId').value.trim();
       const role = document.getElementById('staffRole').value;
       const department = document.getElementById('department').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -285,20 +327,169 @@
       const qualification = document.getElementById('qualification').value.trim();
       const photoInput = document.getElementById('staffPhoto');
 
-      if (!name || !staffId || !role || !email || !phone) {
-        alert('Please fill all required fields');
+      // Validate required fields
+      if (!name) {
+        alert('Please enter staff name');
+        document.getElementById('staffName').focus();
+        return;
+      }
+      
+      if (!role) {
+        alert('Please select staff role');
+        document.getElementById('staffRole').focus();
+        return;
+      }
+      
+      if (!email) {
+        alert('Please enter email address');
+        document.getElementById('email').focus();
         return;
       }
 
-      // Check if Staff ID has been generated
-      if (!staffId || !staffId.startsWith('STF')) {
-        alert('Please generate a Staff ID first by clicking the "Generate ID" button.');
+      if (!phone) {
+        alert('Please enter phone number');
+        document.getElementById('phone').focus();
         return;
       }
 
+      if (!joinDate) {
+        alert('Please enter join date');
+        document.getElementById('joinDate').focus();
+        return;
+      }
+
+      // Auto-generate Staff ID if not provided (using name and join date)
+      if (!staffId) {
+        if (typeof idGenerator !== 'undefined' && name && joinDate) {
+          try {
+            staffId = idGenerator.generateUniqueNameBasedID(name, joinDate, 'staffData', 'staffId', '');
+            document.getElementById('staffId').value = staffId;
+          } catch (error) {
+            console.error('Error generating ID:', error);
+            alert('Error generating staff ID. Please ensure name and join date are entered, then generate ID manually.');
+            return;
+          }
+        } else if (name && joinDate) {
+          // Fallback generation
+          const existingIds = staffData.map(staff => staff.staffId).filter(Boolean);
+          const existing = new Set(existingIds);
+          
+          const cleanName = name.replace(/\s+/g, '').toUpperCase().substring(0, 3);
+          const date = new Date(joinDate);
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          
+          let baseID = cleanName + day + month;
+          let finalID = baseID;
+          let attempts = 0;
+          
+          while (existing.has(finalID) && attempts < 100) {
+            attempts++;
+            const lastDigit = parseInt(finalID.charAt(6));
+            const newLastDigit = ((lastDigit + attempts) % 10).toString();
+            finalID = baseID.substring(0, 6) + newLastDigit;
+          }
+          
+          staffId = finalID.substring(0, 7).toUpperCase();
+          document.getElementById('staffId').value = staffId;
+        } else {
+          alert('Please enter name and join date to generate staff ID.');
+          return;
+        }
+      }
+      
+      // Verify ID format (should be 7 characters: 3 letters + 4 digits)
+      if (staffId.length !== 7 || !/^[A-Z]{3}\d{4}$/.test(staffId)) {
+        // If format is wrong, regenerate from name and join date
+        if (name && joinDate && typeof idGenerator !== 'undefined') {
+          try {
+            staffId = idGenerator.generateUniqueNameBasedID(name, joinDate, 'staffData', 'staffId', '');
+            document.getElementById('staffId').value = staffId;
+          } catch (error) {
+            alert('Invalid ID format. Please generate a new one using name and join date.');
+            return;
+          }
+        } else {
+          alert('Invalid ID format. Please generate a new one using name and join date.');
+          return;
+        }
+      }
+
+      // Check for duplicate and regenerate if needed
       if (staffData.find(s => s.staffId === staffId)) {
-        alert('Staff ID already exists. Please generate a new ID.');
-        return;
+        // ID already exists, generate a new unique one automatically
+        if (name && joinDate) {
+          console.log('Duplicate ID detected, regenerating...');
+          if (typeof idGenerator !== 'undefined') {
+            try {
+              // Force regeneration by passing current ID to avoid
+              staffId = idGenerator.generateUniqueNameBasedID(name, joinDate, 'staffData', 'staffId', '');
+              document.getElementById('staffId').value = staffId;
+              // Check one more time
+              if (staffData.find(s => s.staffId === staffId)) {
+                // Still duplicate, try with timestamp variation
+                const timestamp = Date.now().toString().substring(8);
+                const cleanName = name.replace(/\s+/g, '').toUpperCase().substring(0, 3);
+                const date = new Date(joinDate);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                staffId = cleanName + day.substring(0, 1) + month.substring(0, 1) + timestamp.substring(0, 2);
+                document.getElementById('staffId').value = staffId.substring(0, 7).toUpperCase();
+              }
+            } catch (error) {
+              console.error('Error regenerating ID:', error);
+              // Fallback regeneration
+              const existingIds = staffData.map(staff => staff.staffId).filter(Boolean);
+              const existing = new Set(existingIds);
+              
+              const cleanName = name.replace(/\s+/g, '').toUpperCase().substring(0, 3);
+              const date = new Date(joinDate);
+              const day = String(date.getDate()).padStart(2, '0');
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              
+              let baseID = cleanName + day + month;
+              let finalID = baseID;
+              let attempts = 0;
+              
+              while (existing.has(finalID) && attempts < 100) {
+                attempts++;
+                const lastDigit = parseInt(finalID.charAt(6)) || 0;
+                const newLastDigit = ((lastDigit + attempts) % 10).toString();
+                finalID = baseID.substring(0, 6) + newLastDigit;
+              }
+              
+              staffId = finalID.substring(0, 7).toUpperCase();
+              document.getElementById('staffId').value = staffId;
+            }
+          } else {
+            // Fallback: regenerate with variation
+            const existingIds = staffData.map(staff => staff.staffId).filter(Boolean);
+            const existing = new Set(existingIds);
+            
+            const cleanName = name.replace(/\s+/g, '').toUpperCase().substring(0, 3);
+            const date = new Date(joinDate);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            
+            let baseID = cleanName + day + month;
+            let finalID = baseID;
+            let attempts = 0;
+            
+            while (existing.has(finalID) && attempts < 100) {
+              attempts++;
+              const lastDigit = parseInt(finalID.charAt(6)) || 0;
+              const newLastDigit = ((lastDigit + attempts) % 10).toString();
+              finalID = baseID.substring(0, 6) + newLastDigit;
+            }
+            
+            staffId = finalID.substring(0, 7).toUpperCase();
+            document.getElementById('staffId').value = staffId;
+          }
+        } else {
+          alert('Staff ID already exists. Please enter name and join date, then generate a new ID.');
+          document.getElementById('staffId').focus();
+          return;
+        }
       }
 
       // Generate a default password for teacher login

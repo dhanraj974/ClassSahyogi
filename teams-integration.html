@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microsoft Teams Integration - ClassSahyogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 20px 30px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .teams-logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .header-right {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(98, 100, 167, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    
+    .main-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+    }
+    
+    .sidebar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    
+    .sidebar-section {
+      margin-bottom: 30px;
+    }
+    
+    .sidebar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+      color: #666;
+    }
+    
+    .nav-item:hover {
+      background: #f0f2f5;
+      color: #6264A7;
+    }
+    
+    .nav-item.active {
+      background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%);
+      color: white;
+    }
+    
+    .content-area {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .section {
+      display: none;
+    }
+    
+    .section.active {
+      display: block;
+    }
+    
+    .section-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .section-subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    
+    .upload-area {
+      border: 3px dashed #6264A7;
+      border-radius: 15px;
+      padding: 60px 30px;
+      text-align: center;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 30px;
+    }
+    
+    .upload-area:hover {
+      background: #e9ecef;
+      border-color: #464EB8;
+    }
+    
+    .upload-area.dragover {
+      background: #e3f2fd;
+      border-color: #464EB8;
+      transform: scale(1.02);
+    }
+    
+    .upload-icon {
+      font-size: 4rem;
+      color: #6264A7;
+      margin-bottom: 20px;
+    }
+    
+    .upload-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .upload-hint {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .files-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .file-card {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .file-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: #6264A7;
+    }
+    
+    .file-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+    
+    .file-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+    
+    .file-info {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .file-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    .file-action-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    
+    .btn-share {
+      background: #6264A7;
+      color: white;
+    }
+    
+    .btn-share:hover {
+      background: #464EB8;
+    }
+    
+    .btn-download {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-download:hover {
+      background: #218838;
+    }
+    
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-delete:hover {
+      background: #c82333;
+    }
+    
+    .share-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .share-modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .share-options {
+      margin-bottom: 25px;
+    }
+    
+    .share-option {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .share-option:hover {
+      border-color: #6264A7;
+      background: #f8f9fa;
+    }
+    
+    .share-option input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .student-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      padding: 15px;
+    }
+    
+    .student-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: background 0.3s ease;
+    }
+    
+    .student-item:hover {
+      background: #f8f9fa;
+    }
+    
+    .student-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    
+    .stat-label {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification.show {
+      display: flex;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+    
+    .search-box {
+      width: 100%;
+      padding: 12px 20px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+    
+    .search-box:focus {
+      outline: none;
+      border-color: #6264A7;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+    
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    .file-checkbox {
+      cursor: pointer;
+    }
+    
+    .file-card:hover .file-checkbox {
+      opacity: 1;
+    }
+    
+    .file-checkbox:not(:checked) {
+      opacity: 0.3;
+    }
+    
+    @media (max-width: 968px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        position: relative;
+        top: 0;
+      }
+      
+      .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="teams-logo">MS</div>
+      <div class="header-title">Microsoft Teams Integration</div>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-secondary" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <button class="btn btn-primary" onclick="syncWithTeams()">
+        <i class="fas fa-sync"></i> Sync with Teams
+      </button>
+      <button class="btn" onclick="logout()" style="background: #dc3545; color: white;">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="main-grid">
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">
+            <i class="fas fa-bars"></i> Navigation
+          </div>
+          <div class="nav-item active" onclick="switchSection('files', this)">
+            <i class="fas fa-folder"></i> My Files
+          </div>
+          <div class="nav-item" onclick="switchSection('shared', this)">
+            <i class="fas fa-share-alt"></i> Shared Files
+          </div>
+          <div class="nav-item" onclick="switchSection('upload', this)">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Files
+          </div>
+          <div class="nav-item" onclick="switchSection('students', this)">
+            <i class="fas fa-users"></i> Students
+          </div>
+          <div class="nav-item" onclick="switchSection('settings', this)">
+            <i class="fas fa-cog"></i> Settings
+          </div>
+          <div class="nav-item" onclick="switchSection('activity', this)">
+            <i class="fas fa-history"></i> Activity Log
+          </div>
+          <div class="nav-item" onclick="switchSection('analytics', this)">
+            <i class="fas fa-chart-bar"></i> Analytics
+          </div>
+        </div>
+        
+        <div class="sidebar-section">
+          <div class="sidebar-title">
+            <i class="fas fa-chart-line"></i> Statistics
+          </div>
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-value" id="totalFiles">0</div>
+              <div class="stat-label">Total Files</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="sharedFiles">0</div>
+              <div class="stat-label">Shared Files</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="totalStudents">0</div>
+              <div class="stat-label">Students</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <!-- Files Section -->
+        <div id="files" class="section active">
+          <h2 class="section-title">
+            <i class="fas fa-folder-open"></i> My Files
+          </h2>
+          <p class="section-subtitle">Manage and organize your files</p>
+          
+          <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+            <input type="text" class="search-box" placeholder="Search files..." id="fileSearch" onkeyup="searchFiles()" style="flex: 1; min-width: 250px;">
+            <select class="search-box" id="fileTypeFilter" onchange="filterFiles()" style="width: 150px;">
+              <option value="all">All Types</option>
+              <option value="pdf">PDF</option>
+              <option value="doc">Word</option>
+              <option value="ppt">PowerPoint</option>
+              <option value="xls">Excel</option>
+              <option value="image">Images</option>
+              <option value="video">Videos</option>
+              <option value="other">Other</option>
+            </select>
+            <select class="search-box" id="sortFiles" onchange="sortFilesList()" style="width: 150px;">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="name">Name A-Z</option>
+              <option value="size">Size</option>
+            </select>
+            <button class="btn btn-primary" onclick="bulkShareFiles()" id="bulkShareBtn" style="display: none;">
+              <i class="fas fa-share"></i> Share Selected
+            </button>
+            <button class="btn btn-secondary" onclick="clearSelection()" id="clearSelectionBtn" style="display: none;">
+              <i class="fas fa-times"></i> Clear
+            </button>
+          </div>
+          
+          <div class="files-grid" id="filesGrid">
+            <!-- Files will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Shared Files Section -->
+        <div id="shared" class="section">
+          <h2 class="section-title">
+            <i class="fas fa-share-alt"></i> Shared Files
+          </h2>
+          <p class="section-subtitle">Files shared with students</p>
+          
+          <div class="files-grid" id="sharedFilesGrid">
+            <!-- Shared files will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div id="upload" class="section">
+          <h2 class="section-title">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Files
+          </h2>
+          <p class="section-subtitle">Upload files to share with all students</p>
+          
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">
+              <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-hint">Supports PDF, DOCX, PPTX, XLSX, Images, and more</div>
+            <div class="upload-hint">Maximum file size: 100MB</div>
+          </div>
+          
+          <input type="file" id="fileInput" class="file-input" multiple onchange="handleFileUpload(event)">
+          
+          <div class="files-grid" id="uploadedFilesGrid">
+            <!-- Recently uploaded files -->
+          </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="students" class="section">
+          <h2 class="section-title">
+            <i class="fas fa-users"></i> Students
+          </h2>
+          <p class="section-subtitle">View and manage student access</p>
+          
+          <input type="text" class="search-box" placeholder="Search students..." id="studentSearch" onkeyup="searchStudents()">
+          
+          <div class="student-list" id="studentList">
+            <!-- Students will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Activity Log Section -->
+        <div id="activity" class="section">
+          <h2 class="section-title">
+            <i class="fas fa-history"></i> Activity Log
+          </h2>
+          <p class="section-subtitle">Track all file sharing activities</p>
+          
+          <div style="background: white; border-radius: 15px; padding: 25px; margin-top: 20px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+              <select class="search-box" id="activityFilter" style="flex: 1;" onchange="filterActivity()">
+                <option value="all">All Activities</option>
+                <option value="upload">File Uploads</option>
+                <option value="share">File Sharing</option>
+                <option value="download">Downloads</option>
+                <option value="delete">Deletions</option>
+              </select>
+              <button class="btn btn-secondary" onclick="clearActivityLog()">
+                <i class="fas fa-trash"></i> Clear Log
+              </button>
+            </div>
+            <div id="activityList" style="max-height: 500px; overflow-y: auto;">
+              <!-- Activity items will be loaded here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="section">
+          <h2 class="section-title">
+            <i class="fas fa-chart-bar"></i> Analytics
+          </h2>
+          <p class="section-subtitle">File sharing statistics and insights</p>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+            <div style="background: white; border-radius: 15px; padding: 25px; text-align: center;">
+              <div style="font-size: 2.5rem; font-weight: 800; color: #6264A7; margin-bottom: 10px;" id="totalDownloads">0</div>
+              <div style="color: #666;">Total Downloads</div>
+            </div>
+            <div style="background: white; border-radius: 15px; padding: 25px; text-align: center;">
+              <div style="font-size: 2.5rem; font-weight: 800; color: #28a745; margin-bottom: 10px;" id="mostDownloaded">-</div>
+              <div style="color: #666;">Most Downloaded File</div>
+            </div>
+            <div style="background: white; border-radius: 15px; padding: 25px; text-align: center;">
+              <div style="font-size: 2.5rem; font-weight: 800; color: #ffc107; margin-bottom: 10px;" id="avgFileSize">0</div>
+              <div style="color: #666;">Average File Size</div>
+            </div>
+            <div style="background: white; border-radius: 15px; padding: 25px; text-align: center;">
+              <div style="font-size: 2.5rem; font-weight: 800; color: #dc3545; margin-bottom: 10px;" id="storageUsed">0</div>
+              <div style="color: #666;">Storage Used</div>
+            </div>
+          </div>
+          
+          <div style="background: white; border-radius: 15px; padding: 25px; margin-top: 20px;">
+            <h3 style="margin-bottom: 20px;">File Type Distribution</h3>
+            <div id="fileTypeChart" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+              <!-- File type stats will be loaded here -->
+            </div>
+          </div>
+          
+          <div style="background: white; border-radius: 15px; padding: 25px; margin-top: 20px;">
+            <h3 style="margin-bottom: 20px;">Recent Download Activity</h3>
+            <div id="downloadActivity" style="max-height: 300px; overflow-y: auto;">
+              <!-- Download activity will be loaded here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+          <h2 class="section-title">
+            <i class="fas fa-cog"></i> Settings
+          </h2>
+          <p class="section-subtitle">Configure Microsoft Teams integration</p>
+          
+          <div class="card" style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+            <h3 style="margin-bottom: 20px;">Teams Connection</h3>
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 10px; font-weight: 600;">Teams Organization</label>
+              <input type="text" class="search-box" placeholder="Enter your Teams organization" value="ClassSahyogi School">
+            </div>
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 10px; font-weight: 600;">Auto-sync Interval</label>
+              <select class="search-box" style="padding: 12px;">
+                <option>Every 5 minutes</option>
+                <option>Every 15 minutes</option>
+                <option>Every 30 minutes</option>
+                <option>Every hour</option>
+                <option>Manual sync only</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;">
+              <i class="fas fa-save"></i> Save Settings
+            </button>
+          </div>
+          
+          <div class="card" style="background: white; padding: 25px; border-radius: 15px;">
+            <h3 style="margin-bottom: 20px;">File Sharing Preferences</h3>
+            <div style="margin-bottom: 15px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" checked style="width: 20px; height: 20px;">
+                <span>Auto-share with all students</span>
+              </label>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" checked style="width: 20px; height: 20px;">
+                <span>Send notification when file is shared</span>
+              </label>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" style="width: 20px; height: 20px;">
+                <span>Require download confirmation</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <div class="share-modal" id="shareModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Share File</h3>
+        <button class="close-btn" onclick="closeShareModal()">&times;</button>
+      </div>
+      
+      <div class="share-options">
+        <div class="share-option" onclick="selectShareOption('all')">
+          <input type="radio" name="shareOption" value="all" id="shareAll" checked>
+          <label for="shareAll" style="cursor: pointer; flex: 1;">
+            <strong>Share with All Students</strong>
+            <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">Share this file with all students in the system</div>
+          </label>
+        </div>
+        
+        <div class="share-option" onclick="selectShareOption('class')">
+          <input type="radio" name="shareOption" value="class" id="shareClass">
+          <label for="shareClass" style="cursor: pointer; flex: 1;">
+            <strong>Share with Specific Class</strong>
+            <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">Select a class to share with</div>
+          </label>
+        </div>
+        
+        <div class="share-option" onclick="selectShareOption('selected')">
+          <input type="radio" name="shareOption" value="selected" id="shareSelected">
+          <label for="shareSelected" style="cursor: pointer; flex: 1;">
+            <strong>Share with Selected Students</strong>
+            <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">Choose specific students</div>
+          </label>
+        </div>
+      </div>
+      
+      <div id="classSelector" style="display: none; margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: 600;">Select Class:</label>
+        <select class="search-box" id="classSelect">
+          <!-- Classes will be loaded here -->
+        </select>
+      </div>
+      
+      <div id="studentSelector" style="display: none;">
+        <label style="display: block; margin-bottom: 10px; font-weight: 600;">Select Students:</label>
+        <div class="student-list" id="modalStudentList">
+          <!-- Students will be loaded here -->
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 25px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="confirmShare()">
+          <i class="fas fa-share"></i> Share File
+        </button>
+        <button class="btn btn-secondary" onclick="closeShareModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification">
+    <i class="fas fa-check-circle"></i>
+    <span id="notificationText"></span>
+  </div>
+
+  <script>
+    let currentFile = null;
+    let files = JSON.parse(localStorage.getItem('teamsFiles') || '[]');
+    let students = JSON.parse(localStorage.getItem('students') || '[]');
+    let currentUser = getCurrentUser();
+    let isStudent = currentUser.role === 'student';
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      if (isStudent) {
+        setupStudentView();
+        // Prevent students from accessing upload functionality even if they try to manipulate the DOM
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+          fileInput.disabled = true;
+          fileInput.style.display = 'none';
+        }
+        const uploadArea = document.getElementById('uploadArea');
+        if (uploadArea) {
+          uploadArea.style.pointerEvents = 'none';
+          uploadArea.style.opacity = '0.5';
+        }
+      } else {
+        loadFiles();
+        loadStudents();
+        loadStatistics();
+        loadAnalytics();
+        setupDragAndDrop();
+      }
+    });
+    
+    function setupStudentView() {
+      // Hide admin/teacher features
+      document.querySelector('.header-right').innerHTML = `
+        <button class="btn btn-secondary" onclick="goBack()">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+      `;
+      
+      // Update sidebar for students
+      document.querySelector('.sidebar').innerHTML = `
+        <div class="sidebar-section">
+          <div class="sidebar-title">
+            <i class="fas fa-bars"></i> Navigation
+          </div>
+          <div class="nav-item active" onclick="switchSection('shared', this)">
+            <i class="fas fa-folder-open"></i> Shared Files
+          </div>
+        </div>
+        
+        <div class="sidebar-section">
+          <div class="sidebar-title">
+            <i class="fas fa-chart-line"></i> Statistics
+          </div>
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-value" id="sharedFilesCount">0</div>
+              <div class="stat-label">Shared Files</div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Hide upload section and show only shared files
+      document.getElementById('upload').style.display = 'none';
+      document.getElementById('files').style.display = 'none';
+      document.getElementById('students').style.display = 'none';
+      document.getElementById('settings').style.display = 'none';
+      
+      // Switch to shared section
+      switchSection('shared');
+      loadSharedFilesForStudent();
+    }
+    
+    function loadSharedFilesForStudent() {
+      const sharedFilesGrid = document.getElementById('sharedFilesGrid');
+      sharedFilesGrid.innerHTML = '';
+      
+      const studentRoll = currentUser.id;
+      const sharedFiles = files.filter(f => f.shared && f.sharedWith.includes(studentRoll));
+      
+      document.getElementById('sharedFilesCount').textContent = sharedFiles.length;
+      
+      if (sharedFiles.length === 0) {
+        sharedFilesGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <div class="empty-icon">📁</div>
+            <h3>No shared files yet</h3>
+            <p>Your teachers haven't shared any files with you yet.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      sharedFiles.forEach(file => {
+        const fileCard = createStudentFileCard(file);
+        sharedFilesGrid.appendChild(fileCard);
+      });
+    }
+    
+    function createStudentFileCard(file) {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      
+      const fileIcon = getFileIcon(file.type, file.name);
+      const fileSize = formatFileSize(file.size);
+      const shareDate = new Date(file.sharedAt || file.uploadedAt).toLocaleDateString();
+      
+      card.innerHTML = `
+        <div class="file-icon">${fileIcon}</div>
+        <div class="file-name" title="${file.name}">${file.name}</div>
+        <div class="file-info">📅 Shared: ${shareDate}</div>
+        <div class="file-info">📊 ${fileSize}</div>
+        <div class="file-info">👤 ${file.uploadedBy}</div>
+        <div class="file-actions">
+          <button class="file-action-btn btn-download" style="width: 100%;" onclick="downloadFile(${file.id})">
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+      `;
+      
+      return card;
+    }
+
+    function setupDragAndDrop() {
+      const uploadArea = document.getElementById('uploadArea');
+      
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+      
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+      
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const droppedFiles = e.dataTransfer.files;
+        handleFileUpload({ target: { files: droppedFiles } });
+      });
+    }
+
+    function switchSection(section, element) {
+      // Update nav items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      if (element) {
+        element.classList.add('active');
+      }
+      
+      // Update sections
+      document.querySelectorAll('.section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+      const targetSection = document.getElementById(section);
+      if (targetSection) {
+        targetSection.classList.add('active');
+      }
+      
+      // Load section-specific data
+      if (section === 'shared') {
+        loadSharedFiles();
+      } else if (section === 'students') {
+        loadStudentsList();
+      } else if (section === 'activity') {
+        loadActivityLog();
+      } else if (section === 'analytics') {
+        loadAnalytics();
+      }
+    }
+
+    function handleFileUpload(event) {
+      // Prevent students from uploading files
+      const currentUser = getCurrentUser();
+      if (currentUser.role === 'student') {
+        showNotification('Students cannot upload files. Only teachers and admins can upload files.', 'error');
+        event.target.value = ''; // Clear file input
+        return;
+      }
+      
+      const fileList = event.target.files;
+      
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          const fileData = {
+            id: Date.now() + i,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data: e.target.result,
+            uploadedAt: new Date().toISOString(),
+            uploadedBy: getCurrentUser().name || 'Teacher',
+            shared: false,
+            sharedWith: [],
+            downloadCount: 0,
+            tags: [],
+            category: 'general',
+            description: '',
+            expiresAt: null
+          };
+          
+          // Log activity
+          logActivity('upload', file.name, getCurrentUser().name);
+          
+          files.push(fileData);
+          localStorage.setItem('teamsFiles', JSON.stringify(files));
+          
+          showNotification(`File "${file.name}" uploaded successfully!`);
+          loadFiles();
+          loadStatistics();
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function loadFiles() {
+      const filesGrid = document.getElementById('filesGrid');
+      filesGrid.innerHTML = '';
+      
+      if (files.length === 0) {
+        filesGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <div class="empty-icon">📁</div>
+            <h3>No files yet</h3>
+            <p>Upload your first file to get started</p>
+          </div>
+        `;
+        return;
+      }
+      
+      files.forEach(file => {
+        const fileCard = createFileCard(file);
+        filesGrid.appendChild(fileCard);
+      });
+    }
+
+    function createFileCard(file) {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      card.dataset.fileId = file.id;
+      
+      const fileIcon = getFileIcon(file.type, file.name);
+      const fileSize = formatFileSize(file.size);
+      const uploadDate = new Date(file.uploadedAt).toLocaleDateString();
+      const downloadCount = file.downloadCount || 0;
+      const isShared = file.shared ? '✓' : '';
+      const tags = file.tags ? file.tags.join(', ') : '';
+      
+      card.innerHTML = `
+        <div style="position: relative;">
+          <input type="checkbox" class="file-checkbox" style="position: absolute; top: 10px; right: 10px; width: 20px; height: 20px; z-index: 10;" onchange="toggleFileSelection(${file.id})">
+          ${isShared ? '<div style="position: absolute; top: 10px; left: 10px; background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; z-index: 10;">SHARED</div>' : ''}
+        </div>
+        <div class="file-icon">${fileIcon}</div>
+        <div class="file-name" title="${file.name}">${file.name}</div>
+        <div class="file-info">📅 ${uploadDate}</div>
+        <div class="file-info">📊 ${fileSize}</div>
+        <div class="file-info">👤 ${file.uploadedBy}</div>
+        <div class="file-info">⬇️ ${downloadCount} downloads</div>
+        ${tags ? `<div class="file-info" style="font-size: 0.75rem; color: #6264A7;">🏷️ ${tags}</div>` : ''}
+        <div class="file-actions">
+          <button class="file-action-btn btn-share" onclick="openShareModal(${file.id})" title="Share file">
+            <i class="fas fa-share"></i> Share
+          </button>
+          <button class="file-action-btn btn-download" onclick="downloadFile(${file.id})" title="Download file">
+            <i class="fas fa-download"></i> Download
+          </button>
+          <button class="file-action-btn" style="background: #17a2b8; color: white;" onclick="previewFile(${file.id})" title="Preview file">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="file-action-btn btn-delete" onclick="deleteFile(${file.id})" title="Delete file">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+      
+      return card;
+    }
+
+    function getFileIcon(type, name) {
+      if (!type) type = '';
+      if (type.includes('pdf') || (name && name.toLowerCase().endsWith('.pdf'))) return '📄';
+      if (type.includes('word') || (name && (name.toLowerCase().endsWith('.docx') || name.toLowerCase().endsWith('.doc')))) return '📝';
+      if (type.includes('powerpoint') || (name && (name.toLowerCase().endsWith('.pptx') || name.toLowerCase().endsWith('.ppt')))) return '📊';
+      if (type.includes('excel') || (name && (name.toLowerCase().endsWith('.xlsx') || name.toLowerCase().endsWith('.xls')))) return '📈';
+      if (type.includes('image')) return '🖼️';
+      if (type.includes('video')) return '🎥';
+      if (type.includes('audio')) return '🎵';
+      if (name && name.toLowerCase().endsWith('.zip')) return '📦';
+      if (name && name.toLowerCase().endsWith('.txt')) return '📄';
+      return '📁';
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function openShareModal(fileId) {
+      // Prevent students from sharing files
+      const currentUser = getCurrentUser();
+      if (currentUser.role === 'student') {
+        showNotification('Students cannot share files. Only teachers and admins can share files.', 'error');
+        return;
+      }
+      
+      currentFile = files.find(f => f.id === fileId);
+      if (!currentFile) return;
+      
+      document.getElementById('shareModal').classList.add('active');
+      loadClasses();
+      loadModalStudents();
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModal').classList.remove('active');
+      currentFile = null;
+    }
+
+    function selectShareOption(option) {
+      document.getElementById('classSelector').style.display = option === 'class' ? 'block' : 'none';
+      document.getElementById('studentSelector').style.display = option === 'selected' ? 'block' : 'none';
+    }
+
+    function loadClasses() {
+      const classSelect = document.getElementById('classSelect');
+      const uniqueClasses = [...new Set(students.map(s => s.class))];
+      
+      classSelect.innerHTML = '<option value="">Select a class</option>';
+      uniqueClasses.forEach(className => {
+        const option = document.createElement('option');
+        option.value = className;
+        option.textContent = className;
+        classSelect.appendChild(option);
+      });
+    }
+
+    function loadModalStudents() {
+      const modalStudentList = document.getElementById('modalStudentList');
+      modalStudentList.innerHTML = '';
+      
+      students.forEach(student => {
+        const item = document.createElement('div');
+        item.className = 'student-item';
+        item.innerHTML = `
+          <input type="checkbox" id="student_${student.roll}" value="${student.roll}">
+          <label for="student_${student.roll}" style="cursor: pointer; flex: 1;">
+            <strong>${student.name}</strong> - ${student.class} ${student.section || ''} (${student.roll})
+          </label>
+        `;
+        modalStudentList.appendChild(item);
+      });
+    }
+
+    function confirmShare() {
+      // Prevent students from sharing files
+      const currentUser = getCurrentUser();
+      if (currentUser.role === 'student') {
+        showNotification('Students cannot share files. Only teachers and admins can share files.', 'error');
+        closeShareModal();
+        return;
+      }
+      
+      if (!currentFile) return;
+      
+      const shareOption = document.querySelector('input[name="shareOption"]:checked').value;
+      let sharedWith = [];
+      
+      if (shareOption === 'all') {
+        sharedWith = students.map(s => s.roll);
+      } else if (shareOption === 'class') {
+        const selectedClass = document.getElementById('classSelect').value;
+        sharedWith = students.filter(s => s.class === selectedClass).map(s => s.roll);
+      } else if (shareOption === 'selected') {
+        const checkboxes = document.querySelectorAll('#modalStudentList input[type="checkbox"]:checked');
+        sharedWith = Array.from(checkboxes).map(cb => cb.value);
+      }
+      
+      if (sharedWith.length === 0) {
+        showNotification('Please select at least one student or class', 'error');
+        return;
+      }
+      
+      currentFile.shared = true;
+      currentFile.sharedWith = sharedWith;
+      currentFile.sharedAt = new Date().toISOString();
+      
+      const index = files.findIndex(f => f.id === currentFile.id);
+      if (index !== -1) {
+        files[index] = currentFile;
+        localStorage.setItem('teamsFiles', JSON.stringify(files));
+      }
+      
+      logActivity('share', currentFile.name, getCurrentUser().name, `Shared with ${sharedWith.length} student(s)`);
+      
+      showNotification(`File shared with ${sharedWith.length} student(s) successfully!`);
+      closeShareModal();
+      loadFiles();
+      loadSharedFiles();
+      loadStatistics();
+    }
+
+    function downloadFile(fileId) {
+      const file = files.find(f => f.id === fileId);
+      if (!file) return;
+      
+      // Track download
+      file.downloadCount = (file.downloadCount || 0) + 1;
+      file.lastDownloadedAt = new Date().toISOString();
+      file.lastDownloadedBy = getCurrentUser().name || 'Unknown';
+      
+      const index = files.findIndex(f => f.id === fileId);
+      if (index !== -1) {
+        files[index] = file;
+        localStorage.setItem('teamsFiles', JSON.stringify(files));
+      }
+      
+      // Log activity
+      logActivity('download', file.name, getCurrentUser().name);
+      
+      const link = document.createElement('a');
+      link.href = file.data;
+      link.download = file.name;
+      link.click();
+      
+      showNotification(`Downloading "${file.name}"...`);
+      loadFiles();
+      loadStatistics();
+      loadAnalytics();
+    }
+    
+    function previewFile(fileId) {
+      const file = files.find(f => f.id === fileId);
+      if (!file) return;
+      
+      // Create preview modal
+      const modal = document.createElement('div');
+      modal.className = 'share-modal active';
+      modal.style.zIndex = '2000';
+      
+      let previewContent = '';
+      if (file.type && file.type.includes('image')) {
+        previewContent = `<img src="${file.data}" style="max-width: 100%; max-height: 70vh; border-radius: 10px;">`;
+      } else if (file.type && file.type.includes('pdf')) {
+        previewContent = `<iframe src="${file.data}" style="width: 100%; height: 70vh; border: none; border-radius: 10px;"></iframe>`;
+      } else {
+        previewContent = `
+          <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">${getFileIcon(file.type, file.name)}</div>
+            <h3>${file.name}</h3>
+            <p>Preview not available for this file type</p>
+            <button class="btn btn-primary" onclick="downloadFile(${fileId}); this.closest('.share-modal').remove();">
+              <i class="fas fa-download"></i> Download to View
+            </button>
+          </div>
+        `;
+      }
+      
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3 class="modal-title">Preview: ${file.name}</h3>
+            <button class="close-btn" onclick="this.closest('.share-modal').remove()">&times;</button>
+          </div>
+          <div style="text-align: center; margin: 20px 0;">
+            ${previewContent}
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-primary" style="flex: 1;" onclick="downloadFile(${fileId}); this.closest('.share-modal').remove();">
+              <i class="fas fa-download"></i> Download
+            </button>
+            <button class="btn btn-secondary" onclick="this.closest('.share-modal').remove()">
+              Close
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+    
+    let selectedFiles = [];
+    
+    function toggleFileSelection(fileId) {
+      const index = selectedFiles.indexOf(fileId);
+      if (index > -1) {
+        selectedFiles.splice(index, 1);
+      } else {
+        selectedFiles.push(fileId);
+      }
+      
+      updateBulkButtons();
+    }
+    
+    function updateBulkButtons() {
+      const bulkShareBtn = document.getElementById('bulkShareBtn');
+      const clearBtn = document.getElementById('clearSelectionBtn');
+      
+      if (selectedFiles.length > 0) {
+        bulkShareBtn.style.display = 'inline-flex';
+        clearBtn.style.display = 'inline-flex';
+        bulkShareBtn.innerHTML = `<i class="fas fa-share"></i> Share ${selectedFiles.length} File(s)`;
+      } else {
+        bulkShareBtn.style.display = 'none';
+        clearBtn.style.display = 'none';
+      }
+    }
+    
+    function clearSelection() {
+      selectedFiles = [];
+      document.querySelectorAll('.file-checkbox').forEach(cb => cb.checked = false);
+      updateBulkButtons();
+    }
+    
+    function bulkShareFiles() {
+      // Prevent students from sharing files
+      const currentUser = getCurrentUser();
+      if (currentUser.role === 'student') {
+        showNotification('Students cannot share files. Only teachers and admins can share files.', 'error');
+        return;
+      }
+      
+      if (selectedFiles.length === 0) return;
+      
+      // Open share modal for bulk sharing
+      const shareOption = confirm(`Share ${selectedFiles.length} file(s) with all students?`);
+      if (!shareOption) return;
+      
+      const students = JSON.parse(localStorage.getItem('students') || '[]');
+      const sharedWith = students.map(s => s.roll);
+      
+      selectedFiles.forEach(fileId => {
+        const file = files.find(f => f.id === fileId);
+        if (file) {
+          file.shared = true;
+          file.sharedWith = sharedWith;
+          file.sharedAt = new Date().toISOString();
+          
+          const index = files.findIndex(f => f.id === fileId);
+          if (index !== -1) {
+            files[index] = file;
+            logActivity('share', file.name, getCurrentUser().name, `${sharedWith.length} students`);
+          }
+        }
+      });
+      
+      localStorage.setItem('teamsFiles', JSON.stringify(files));
+      showNotification(`Successfully shared ${selectedFiles.length} file(s) with all students!`);
+      clearSelection();
+      loadFiles();
+      loadSharedFiles();
+      loadStatistics();
+    }
+    
+    function filterFiles() {
+      const filter = document.getElementById('fileTypeFilter').value;
+      const fileCards = document.querySelectorAll('#filesGrid .file-card');
+      
+      fileCards.forEach(card => {
+        const fileId = parseInt(card.dataset.fileId);
+        const file = files.find(f => f.id === fileId);
+        if (!file) return;
+        
+        let show = true;
+        if (filter !== 'all') {
+          if (filter === 'pdf' && !file.type?.includes('pdf') && !file.name?.toLowerCase().endsWith('.pdf')) show = false;
+          else if (filter === 'doc' && !file.type?.includes('word') && !file.name?.toLowerCase().match(/\.(doc|docx)$/)) show = false;
+          else if (filter === 'ppt' && !file.type?.includes('powerpoint') && !file.name?.toLowerCase().match(/\.(ppt|pptx)$/)) show = false;
+          else if (filter === 'xls' && !file.type?.includes('excel') && !file.name?.toLowerCase().match(/\.(xls|xlsx)$/)) show = false;
+          else if (filter === 'image' && !file.type?.includes('image')) show = false;
+          else if (filter === 'video' && !file.type?.includes('video')) show = false;
+          else if (filter === 'other' && (file.type?.includes('pdf') || file.type?.includes('word') || file.type?.includes('powerpoint') || file.type?.includes('excel') || file.type?.includes('image') || file.type?.includes('video'))) show = false;
+        }
+        
+        card.style.display = show ? 'block' : 'none';
+      });
+    }
+    
+    function sortFilesList() {
+      const sortBy = document.getElementById('sortFiles').value;
+      const filesGrid = document.getElementById('filesGrid');
+      const fileCards = Array.from(filesGrid.querySelectorAll('.file-card'));
+      
+      fileCards.sort((a, b) => {
+        const fileA = files.find(f => f.id === parseInt(a.dataset.fileId));
+        const fileB = files.find(f => f.id === parseInt(b.dataset.fileId));
+        
+        if (!fileA || !fileB) return 0;
+        
+        switch(sortBy) {
+          case 'newest':
+            return new Date(fileB.uploadedAt) - new Date(fileA.uploadedAt);
+          case 'oldest':
+            return new Date(fileA.uploadedAt) - new Date(fileB.uploadedAt);
+          case 'name':
+            return fileA.name.localeCompare(fileB.name);
+          case 'size':
+            return fileB.size - fileA.size;
+          default:
+            return 0;
+        }
+      });
+      
+      fileCards.forEach(card => filesGrid.appendChild(card));
+    }
+    
+    function logActivity(type, fileName, userName, details = '') {
+      const activities = JSON.parse(localStorage.getItem('teamsActivities') || '[]');
+      activities.unshift({
+        id: Date.now(),
+        type: type,
+        fileName: fileName,
+        userName: userName,
+        details: details,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Keep only last 100 activities
+      if (activities.length > 100) {
+        activities.splice(100);
+      }
+      
+      localStorage.setItem('teamsActivities', JSON.stringify(activities));
+      if (document.getElementById('activityList')) {
+        loadActivityLog();
+      }
+    }
+    
+    function loadActivityLog() {
+      const activities = JSON.parse(localStorage.getItem('teamsActivities') || '[]');
+      const filter = document.getElementById('activityFilter')?.value || 'all';
+      const filteredActivities = filter === 'all' ? activities : activities.filter(a => a.type === filter);
+      const activityList = document.getElementById('activityList');
+      
+      if (!activityList) return;
+      
+      activityList.innerHTML = '';
+      
+      if (filteredActivities.length === 0) {
+        activityList.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><h3>No activities yet</h3></div>';
+        return;
+      }
+      
+      filteredActivities.forEach(activity => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding: 15px; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; gap: 15px;';
+        
+        const icons = {
+          upload: '📤',
+          share: '🔗',
+          download: '⬇️',
+          delete: '🗑️'
+        };
+        
+        const colors = {
+          upload: '#17a2b8',
+          share: '#28a745',
+          download: '#6264A7',
+          delete: '#dc3545'
+        };
+        
+        item.innerHTML = `
+          <div style="width: 40px; height: 40px; background: ${colors[activity.type] || '#666'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            ${icons[activity.type] || '📋'}
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: #333;">${activity.fileName}</div>
+            <div style="font-size: 0.85rem; color: #666;">
+              ${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)} by ${activity.userName}
+              ${activity.details ? ` • ${activity.details}` : ''}
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: #999;">
+            ${new Date(activity.timestamp).toLocaleString()}
+          </div>
+        `;
+        
+        activityList.appendChild(item);
+      });
+    }
+    
+    function filterActivity() {
+      loadActivityLog();
+    }
+    
+    function clearActivityLog() {
+      if (confirm('Are you sure you want to clear all activity logs?')) {
+        localStorage.removeItem('teamsActivities');
+        loadActivityLog();
+        showNotification('Activity log cleared!');
+      }
+    }
+    
+    function loadAnalytics() {
+      const totalDownloads = files.reduce((sum, f) => sum + (f.downloadCount || 0), 0);
+      const mostDownloaded = files.reduce((max, f) => {
+        return (f.downloadCount || 0) > (max.downloadCount || 0) ? f : max;
+      }, { name: '-', downloadCount: 0 });
+      
+      const totalSize = files.reduce((sum, f) => sum + (f.size || 0), 0);
+      const avgSize = files.length > 0 ? totalSize / files.length : 0;
+      
+      document.getElementById('totalDownloads').textContent = totalDownloads;
+      document.getElementById('mostDownloaded').textContent = mostDownloaded.name.length > 20 ? mostDownloaded.name.substring(0, 20) + '...' : mostDownloaded.name;
+      document.getElementById('avgFileSize').textContent = formatFileSize(avgSize);
+      document.getElementById('storageUsed').textContent = formatFileSize(totalSize);
+      
+      // File type distribution
+      const typeCounts = {};
+      files.forEach(f => {
+        const type = getFileType(f.type, f.name);
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+      });
+      
+      const fileTypeChart = document.getElementById('fileTypeChart');
+      if (fileTypeChart) {
+        fileTypeChart.innerHTML = '';
+        Object.entries(typeCounts).forEach(([type, count]) => {
+          const item = document.createElement('div');
+          item.style.cssText = 'text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px;';
+          item.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 5px;">${getFileIcon(null, type)}</div>
+            <div style="font-weight: 600; color: #333;">${count}</div>
+            <div style="font-size: 0.85rem; color: #666;">${type}</div>
+          `;
+          fileTypeChart.appendChild(item);
+        });
+      }
+      
+      // Recent downloads
+      const recentDownloads = files
+        .filter(f => f.lastDownloadedAt)
+        .sort((a, b) => new Date(b.lastDownloadedAt) - new Date(a.lastDownloadedAt))
+        .slice(0, 10);
+      
+      const downloadActivity = document.getElementById('downloadActivity');
+      if (downloadActivity) {
+        downloadActivity.innerHTML = '';
+        if (recentDownloads.length === 0) {
+          downloadActivity.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">No downloads yet</div>';
+        } else {
+          recentDownloads.forEach(file => {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding: 10px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;';
+            item.innerHTML = `
+              <div>
+                <div style="font-weight: 600;">${file.name}</div>
+                <div style="font-size: 0.85rem; color: #666;">Downloaded by ${file.lastDownloadedBy || 'Unknown'}</div>
+              </div>
+              <div style="font-size: 0.8rem; color: #999;">
+                ${new Date(file.lastDownloadedAt).toLocaleString()}
+              </div>
+            `;
+            downloadActivity.appendChild(item);
+          });
+        }
+      }
+    }
+    
+    function getFileType(type, name) {
+      if (!type) type = '';
+      if (type.includes('pdf') || (name && name.toLowerCase().endsWith('.pdf'))) return 'PDF';
+      if (type.includes('word') || (name && (name.toLowerCase().endsWith('.docx') || name.toLowerCase().endsWith('.doc')))) return 'Word';
+      if (type.includes('powerpoint') || (name && (name.toLowerCase().endsWith('.pptx') || name.toLowerCase().endsWith('.ppt')))) return 'PowerPoint';
+      if (type.includes('excel') || (name && (name.toLowerCase().endsWith('.xlsx') || name.toLowerCase().endsWith('.xls')))) return 'Excel';
+      if (type.includes('image')) return 'Image';
+      if (type.includes('video')) return 'Video';
+      if (type.includes('audio')) return 'Audio';
+      return 'Other';
+    }
+
+    function deleteFile(fileId) {
+      const file = files.find(f => f.id === fileId);
+      if (!file) return;
+      
+      if (!confirm(`Are you sure you want to delete "${file.name}"?`)) return;
+      
+      logActivity('delete', file.name, getCurrentUser().name);
+      
+      files = files.filter(f => f.id !== fileId);
+      localStorage.setItem('teamsFiles', JSON.stringify(files));
+      
+      showNotification('File deleted successfully!');
+      loadFiles();
+      loadSharedFiles();
+      loadStatistics();
+      loadAnalytics();
+    }
+
+    function loadSharedFiles() {
+      const sharedFilesGrid = document.getElementById('sharedFilesGrid');
+      sharedFilesGrid.innerHTML = '';
+      
+      const sharedFiles = files.filter(f => f.shared);
+      
+      if (sharedFiles.length === 0) {
+        sharedFilesGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <div class="empty-icon">📤</div>
+            <h3>No shared files yet</h3>
+            <p>Share files with students to see them here</p>
+          </div>
+        `;
+        return;
+      }
+      
+      sharedFiles.forEach(file => {
+        const fileCard = createFileCard(file);
+        sharedFilesGrid.appendChild(fileCard);
+      });
+    }
+
+    function loadStudentsList() {
+      const studentList = document.getElementById('studentList');
+      studentList.innerHTML = '';
+      
+      if (students.length === 0) {
+        studentList.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><h3>No students found</h3></div>';
+        return;
+      }
+      
+      students.forEach(student => {
+        const item = document.createElement('div');
+        item.className = 'student-item';
+        item.innerHTML = `
+          <div style="flex: 1;">
+            <strong>${student.name}</strong>
+            <div style="font-size: 0.9rem; color: #666;">
+              ${student.class} ${student.section || ''} • Roll: ${student.roll}
+            </div>
+          </div>
+          <button class="btn btn-primary" style="padding: 8px 15px;" onclick="viewStudentFiles('${student.roll}')">
+            <i class="fas fa-folder"></i> View Files
+          </button>
+        `;
+        studentList.appendChild(item);
+      });
+    }
+
+    function viewStudentFiles(roll) {
+      const studentFiles = files.filter(f => f.shared && f.sharedWith.includes(roll));
+      alert(`Student has access to ${studentFiles.length} shared file(s)`);
+    }
+
+    function searchFiles() {
+      const searchTerm = document.getElementById('fileSearch').value.toLowerCase();
+      const fileCards = document.querySelectorAll('#filesGrid .file-card');
+      
+      fileCards.forEach(card => {
+        const fileName = card.querySelector('.file-name').textContent.toLowerCase();
+        if (fileName.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function searchStudents() {
+      const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+      const studentItems = document.querySelectorAll('#studentList .student-item');
+      
+      studentItems.forEach(item => {
+        const studentText = item.textContent.toLowerCase();
+        if (studentText.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function loadStatistics() {
+      document.getElementById('totalFiles').textContent = files.length;
+      document.getElementById('sharedFiles').textContent = files.filter(f => f.shared).length;
+      document.getElementById('totalStudents').textContent = students.length;
+    }
+
+    function syncWithTeams() {
+      showNotification('Syncing with Microsoft Teams...', 'info');
+      setTimeout(() => {
+        showNotification('Successfully synced with Microsoft Teams!');
+      }, 2000);
+    }
+
+    function goBack() {
+      const currentUser = getCurrentUser();
+      if (currentUser.role === 'admin') {
+        window.location.href = 'admin-dashboard.html';
+      } else if (currentUser.role === 'teacher') {
+        window.location.href = 'teacher-dashboard.html';
+      } else {
+        window.location.href = 'index (13).html';
+      }
+    }
+    
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('currentUser');
+        localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('adminUser');
+        window.location.href = 'index (13).html';
+      }
+    }
+
+    function getCurrentUser() {
+      return JSON.parse(sessionStorage.getItem('currentUser') || '{"role": "teacher", "name": "Teacher"}');
+    }
+
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      const notificationText = document.getElementById('notificationText');
+      
+      notificationText.textContent = message;
+      notification.className = `notification ${type} show`;
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('shareModal');
+      if (event.target === modal) {
+        closeShareModal();
+      }
+    }
+  </script>
+</body>
+</html>
+

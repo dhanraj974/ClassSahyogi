@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teacher Dashboard • ClassSahyogi</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Database Integration -->
+  <script src="firebase-config.js"></script>
+  <script src="database.js"></script>
+  <script src="database-sync.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     html { scroll-behavior: smooth; }
@@ -78,6 +85,7 @@
       <a href="javascript:void(0)" onclick="navigateTo('timetable')"><span>📅</span> Timetable</a>
       <a href="javascript:void(0)" onclick="navigateTo('fees')"><span>💰</span> Fees</a>
       <a href="javascript:void(0)" onclick="navigateTo('analytics')"><span>📊</span> Analytics</a>
+      <a href="teams-integration.html" style="background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%); padding: 12px; border-radius: 8px; margin-top: 10px;"><span>💼</span> Microsoft Teams</a>
     </nav>
     
     <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
@@ -101,7 +109,7 @@
         <h2 style="margin: 0 0 30px 0; color: #333;">Welcome to Teacher Dashboard</h2>
         
         <div class="restricted-notice">
-          <strong>⚠️ Access Notice:</strong> As a teacher, you have access to student management, attendance, marks, and other educational features.
+          <strong>⚠️ Access Notice:</strong> As a teacher, you have access to most features but cannot add or manage staff members. This is restricted to administrators only.
         </div>
         
         <!-- Key Statistics -->
@@ -177,17 +185,21 @@
             <div class="action-title">View Analytics</div>
             <div class="action-desc">Performance reports</div>
           </div>
+          <div class="action-card" onclick="window.location.href='teams-integration.html'" style="background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%); color: white;">
+            <div class="action-icon">💼</div>
+            <div class="action-title">Microsoft Teams</div>
+            <div class="action-desc">Share files with students</div>
+          </div>
         </div>
 
-        <!-- Available Features Notice -->
-        <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-top: 20px; border-left: 4px solid #28a745;">
-          <h4 style="margin: 0 0 10px 0; color: #155724;">✅ Available Features</h4>
+        <!-- Restricted Features Notice -->
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-top: 20px; border-left: 4px solid #ffc107;">
+          <h4 style="margin: 0 0 10px 0; color: #856404;">🚫 Restricted Features</h4>
           <ul style="margin: 0; color: #666;">
-            <li>View and manage student information</li>
-            <li>Mark and track student attendance</li>
-            <li>Enter and manage student marks</li>
-            <li>View class timetables</li>
-            <li>Access student analytics and reports</li>
+            <li>Cannot add or remove staff members</li>
+            <li>Cannot modify system settings</li>
+            <li>Cannot access admin-only reports</li>
+            <li>Cannot manage user permissions</li>
           </ul>
         </div>
 
@@ -216,19 +228,27 @@
     </div>
   </div>
 
-  <script src="common.js"></script>
   <script>
     // Check authentication
-    window.addEventListener('load', () => {
+    window.addEventListener('load', async () => {
       const currentUser = sessionStorage.getItem('currentUser');
       if (!currentUser) {
-        window.location.href = 'login.html';
+        window.location.href = 'index (13).html';
         return;
+      }
+      
+      // Try to load data from cloud first (for cross-device access)
+      if (typeof databaseSync !== 'undefined' && databaseSync.loadFromCloud) {
+        try {
+          await databaseSync.loadFromCloud();
+        } catch (error) {
+          console.log('Cloud sync failed, using local data:', error);
+        }
       }
       
       const user = JSON.parse(currentUser);
       if (user.role !== 'teacher') {
-        window.location.href = 'login.html';
+        window.location.href = 'index (13).html';
         return;
       }
       
@@ -268,7 +288,7 @@
         'dashboard': 'teacher-dashboard.html',
         'enrollment': 'enrollment.html',
         'attendance': 'attendance.html', 
-        'marks': 'marks.html',
+        'marks': 'marks (3).html',
         'timetable': 'timetable.html',
         'fees': 'fees.html',
         'analytics': 'analytics.html'
@@ -288,7 +308,7 @@
 
     function logout() {
       sessionStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
+      window.location.href = 'index (13).html';
     }
 
     function searchStudents() {
@@ -363,9 +383,7 @@
 
       Object.values(attendance).forEach(division => {
         Object.values(division).forEach(dayRecords => {
-          const studentRecord = dayRecords.find(record => 
-            record.roll === rollNumber || record.rollNumber === rollNumber
-          );
+          const studentRecord = dayRecords.find(record => record.rollNumber === rollNumber);
           if (studentRecord) {
             totalDays++;
             if (studentRecord.status === 'Present') {
@@ -380,22 +398,17 @@
 
     function getStudentMarks(rollNumber) {
       const marks = JSON.parse(localStorage.getItem('marks')) || {};
-      
-      // Marks are stored by roll number as key
-      const studentMarks = marks[rollNumber];
-      if (!studentMarks) {
-        return 0;
-      }
-
       let totalMarks = 0;
       let totalSubjects = 0;
-      const subjects = ['english', 'math', 'science', 'social', 'computer'];
-      
-      subjects.forEach(subject => {
-        if (studentMarks[subject] && !isNaN(parseInt(studentMarks[subject]))) {
-          totalMarks += parseInt(studentMarks[subject]);
-          totalSubjects++;
-        }
+
+      Object.values(marks).forEach(division => {
+        Object.values(division).forEach(subjectRecords => {
+          const studentRecord = subjectRecords.find(record => record.rollNumber === rollNumber);
+          if (studentRecord && studentRecord.marks) {
+            totalMarks += parseInt(studentRecord.marks);
+            totalSubjects++;
+          }
+        });
       });
 
       return totalSubjects > 0 ? Math.round(totalMarks / totalSubjects) : 0;

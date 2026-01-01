@@ -5,15 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enrollment • ClassSahyogi</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <!-- Database Integration -->
-  <script src="firebase-config.js"></script>
-  <script src="database.js"></script>
-  <script src="database-sync.js"></script>
-  <script src="unique-id-generator.js"></script>
   <style>
     html { scroll-behavior: smooth; }
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -67,15 +58,14 @@
           </div>
         </div>
       </div>
-      <a href="javascript:void(0)" onclick="goToDashboard()"><span>🏠</span> Dashboard</a>
+      <a href="index.html"><span>🏠</span> Dashboard</a>
       <a href="enrollment.html"><span>📝</span> Enrollment</a>
       <a href="fees.html"><span>💰</span> Fees</a>
       <a href="timetable.html"><span>📅</span> Timetable</a>
       <a href="staff.html"><span>👥</span> Staff</a>
       <a href="analytics.html"><span>📊</span> Analytics</a>
       <a href="attendance.html"><span>🧾</span> Attendance</a>
-      <a href="marks (3).html"><span>🎓</span> Marks</a>
-      <a href="javascript:void(0)" onclick="logout()" style="margin-top: 20px; padding: 12px; background: rgba(220, 53, 69, 0.2); border-radius: 8px; border: 1px solid rgba(220, 53, 69, 0.5);"><span>🚪</span> Logout</a>
+      <a href="marks.html"><span>🎓</span> Marks</a>
     </nav>
     <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
       <header>
@@ -103,13 +93,8 @@
         <h4 style="margin-top:0; color: #333; font-size: 1.5rem;">📝 Student Registration & Enrollment</h4>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
           <input type="text" id="name" placeholder="Full Name">
-          <input type="text" id="roll" placeholder="7-Character ID (Auto-generated from Name & DOB)" readonly style="background: #f8f9fa; max-width: 200px;">
-          <button id="genRollBtn" onclick="generateUniqueRoll()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; font-weight: 600;">
-            <i class="fas fa-key"></i> Generate ID
-          </button>
-          <div style="font-size: 0.85rem; color: #666; margin-top: 5px; grid-column: 1 / -1;">
-            <i class="fas fa-info-circle"></i> 7-character ID: First 3 letters of name + Day + Month from birth date (e.g., JOH1205)
-          </div>
+          <input type="text" id="roll" placeholder="Unique Roll Number">
+          <button id="genRollBtn" onclick="generateUniqueRoll()">Generate Roll</button>
           <input type="date" id="dob" placeholder="Date of Birth">
           <input type="text" id="contact" placeholder="Contact Number">
           <input type="text" id="class" placeholder="Class / Division">
@@ -141,8 +126,6 @@
   <script>
     // Check user role and restrict access
     window.addEventListener('load', function() {
-      // Note: ID will be auto-generated when name and DOB are entered, or when user clicks Generate ID button
-      
       const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
       
       if (currentUser.role === 'teacher') {
@@ -175,22 +158,13 @@
         window.location.href = 'student-dashboard.html';
       } else {
         // No user logged in, go to main page
-        window.location.href = 'index (13).html';
-      }
-    }
-    
-    function logout() {
-      if (confirm('Are you sure you want to logout?')) {
-        sessionStorage.removeItem('currentUser');
-        localStorage.removeItem('adminLoggedIn');
-        localStorage.removeItem('adminUser');
-        window.location.href = 'index (13).html';
+        window.location.href = 'index.html';
       }
     }
 
     function addStudent() {
       const name = document.getElementById("name").value.trim();
-      let roll = document.getElementById("roll").value.trim();
+      const roll = document.getElementById("roll").value.trim();
       const studentClass = document.getElementById("class").value.trim();
       const dob = document.getElementById("dob").value;
       const contact = (document.getElementById("contact")?.value || '').trim();
@@ -202,237 +176,54 @@
       const photoInput = document.getElementById("photo");
       const docsInput = document.getElementById("documents");
 
-      // Validate required fields
-      if (!name) {
-        alert('Please enter student name');
-        document.getElementById("name").focus();
-        return;
-      }
-      
-      if (!studentClass) {
-        alert('Please select student class');
-        document.getElementById("class").focus();
-        return;
-      }
-      
-      if (!dob) {
-        alert('Please enter date of birth');
-        document.getElementById("dob").focus();
-        return;
-      }
+      if (name && roll && studentClass && dob) {
+        const student = { name, roll, class: studentClass, dob, contact, address, course, semester, section, subjects, photo: '', documents: [] };
+        let students = JSON.parse(localStorage.getItem("students")) || [];
+        if (students.find(s => s.roll === roll)) { alert('Roll already exists. Generate a new one.'); return; }
+        students.push(student);
+        localStorage.setItem("students", JSON.stringify(students));
 
-      // Auto-generate roll number if not provided (using name and DOB)
-      if (!roll) {
-        if (typeof idGenerator !== 'undefined' && name && dob) {
-          try {
-            // Generate 7-character ID from name and birth date
-            roll = idGenerator.generateUniqueNameBasedID(name, dob, 'students', 'roll', 'STU');
-            document.getElementById('roll').value = roll;
-          } catch (error) {
-            console.error('Error generating ID:', error);
-            alert('Error generating student ID. Please ensure name and date of birth are entered.');
-            return;
+        const savePhoto = () => new Promise(resolve => {
+          if (photoInput && photoInput.files && photoInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = () => { resolve(reader.result); };
+            reader.onerror = () => { resolve(''); };
+            reader.readAsDataURL(photoInput.files[0]);
+          } else { resolve(''); }
+        });
+        const saveDocuments = () => new Promise(async resolve => {
+          if (docsInput && docsInput.files && docsInput.files.length) {
+            const files = Array.from(docsInput.files);
+            const readFile = (f) => new Promise(r => { const fr = new FileReader(); fr.onload = () => r({ name: f.name, dataUrl: fr.result }); fr.onerror = () => r({ name: f.name, dataUrl: '' }); fr.readAsDataURL(f); });
+            const docs = await Promise.all(files.map(readFile));
+            resolve(docs);
+          } else { resolve([]); }
+        });
+        Promise.all([savePhoto(), saveDocuments()]).then(([photoDataUrl, docs]) => {
+          let saved = JSON.parse(localStorage.getItem("students")) || [];
+          const idx = saved.findIndex(s => s.roll === student.roll);
+          if (idx !== -1) {
+            saved[idx].photo = photoDataUrl || '';
+            saved[idx].documents = docs || [];
+            localStorage.setItem("students", JSON.stringify(saved));
           }
-        } else if (name && dob) {
-          // Fallback generation using name and DOB
-          const students = JSON.parse(localStorage.getItem('students') || '[]');
-          const existing = new Set(students.map(s => s.roll));
-          
-          // Extract from name and DOB
-          const cleanName = name.replace(/\s+/g, '').toUpperCase().substring(0, 3);
-          const date = new Date(dob);
-          const day = String(date.getDate()).padStart(2, '0');
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          
-          let baseID = cleanName + day + month;
-          let finalID = baseID;
-          let attempts = 0;
-          
-          while (existing.has(finalID) && attempts < 100) {
-            attempts++;
-            const suffix = String(attempts).padStart(2, '0');
-            finalID = baseID.substring(0, 5) + suffix;
-          }
-          
-          roll = finalID.substring(0, 7).toUpperCase();
-          document.getElementById('roll').value = roll;
-        } else {
-          alert('Please enter name and date of birth to generate student ID.');
-          return;
-        }
+          alert("✅ Student added successfully!");
+          window.location.href = 'index.html';
+        });
+      } else {
+        alert("⚠️ Please fill in all fields.");
       }
-
-      // Verify ID format (should be 7 characters: 3 letters + 4 digits)
-      if (roll.length !== 7 || !/^[A-Z]{3}\d{4}$/.test(roll)) {
-        // If format is wrong, regenerate from name and DOB
-        if (name && dob && typeof idGenerator !== 'undefined') {
-          try {
-            roll = idGenerator.generateUniqueNameBasedID(name, dob, 'students', 'roll', 'STU');
-            document.getElementById('roll').value = roll;
-          } catch (error) {
-            alert('Invalid ID format. Please generate a new one using name and date of birth.');
-            return;
-          }
-        } else {
-          alert('Invalid ID format. Please generate a new one using name and date of birth.');
-          return;
-        }
-      }
-      
-      let students = JSON.parse(localStorage.getItem("students") || []);
-      if (students.find(s => s.roll === roll)) { 
-        alert('Roll number already exists. Generating a new one...'); 
-        // Generate new ID from name and DOB
-        if (typeof idGenerator !== 'undefined' && name && dob) {
-          try {
-            roll = idGenerator.generateUniqueNameBasedID(name, dob, 'students', 'roll', 'STU');
-            document.getElementById('roll').value = roll;
-          } catch (error) {
-            alert('Error generating unique ID. Please try again.');
-            return;
-          }
-        } else {
-          alert('Please ensure name and date of birth are entered, then generate a new ID.');
-          document.getElementById('roll').focus();
-          return;
-        }
-      }
-      
-      // Create student object with proper structure
-      const student = { 
-        name, 
-        roll, 
-        class: studentClass, 
-        dob, 
-        contact, 
-        address, 
-        course, 
-        semester, 
-        section, 
-        subjects, 
-        photo: '', 
-        documents: [] 
-      };
-      
-      students.push(student);
-      localStorage.setItem("students", JSON.stringify(students));
-
-      const savePhoto = () => new Promise(resolve => {
-        if (photoInput && photoInput.files && photoInput.files[0]) {
-          const reader = new FileReader();
-          reader.onload = () => { resolve(reader.result); };
-          reader.onerror = () => { resolve(''); };
-          reader.readAsDataURL(photoInput.files[0]);
-        } else { resolve(''); }
-      });
-      
-      const saveDocuments = () => new Promise(async resolve => {
-        if (docsInput && docsInput.files && docsInput.files.length) {
-          const files = Array.from(docsInput.files);
-          const readFile = (f) => new Promise(r => { 
-            const fr = new FileReader(); 
-            fr.onload = () => r({ name: f.name, dataUrl: fr.result }); 
-            fr.onerror = () => r({ name: f.name, dataUrl: '' }); 
-            fr.readAsDataURL(f); 
-          });
-          const docs = await Promise.all(files.map(readFile));
-          resolve(docs);
-        } else { resolve([]); }
-      });
-      
-      Promise.all([savePhoto(), saveDocuments()]).then(([photoDataUrl, docs]) => {
-        let saved = JSON.parse(localStorage.getItem("students")) || [];
-        const idx = saved.findIndex(s => s.roll === roll);
-        if (idx !== -1) {
-          saved[idx].photo = photoDataUrl || '';
-          saved[idx].documents = docs || [];
-          localStorage.setItem("students", JSON.stringify(saved));
-        }
-        alert(`✅ Student "${name}" added successfully!\nStudent ID: ${roll}`);
-        
-        // Clear form
-        document.getElementById("name").value = '';
-        document.getElementById("roll").value = '';
-        document.getElementById("class").value = '';
-        document.getElementById("dob").value = '';
-        document.getElementById("contact").value = '';
-        document.getElementById("address").value = '';
-        document.getElementById("course").value = '';
-        document.getElementById("semester").value = '';
-        document.getElementById("section").value = '';
-        document.getElementById("subjects").value = '';
-        document.getElementById("photo").value = '';
-        document.getElementById("documents").value = '';
-        const photoPreview = document.getElementById("photoPreview");
-        if (photoPreview) photoPreview.style.display = 'none';
-        const docsList = document.getElementById("docsList");
-        if (docsList) docsList.innerHTML = '';
-        
-        // Note: ID will be generated when user enters name and DOB for next student
-      });
     }
     function generateUniqueRoll() {
-      const name = document.getElementById("name").value.trim();
-      const dob = document.getElementById("dob").value;
-      
-      if (!name || !dob) {
-        alert('Please enter student name and date of birth first to generate ID.');
-        if (!name) document.getElementById("name").focus();
-        else if (!dob) document.getElementById("dob").focus();
-        return;
-      }
-      
-      try {
-        // Generate 7-character ID from name and birth date
-        if (typeof idGenerator !== 'undefined') {
-          const newRoll = idGenerator.generateUniqueNameBasedID(name, dob, 'students', 'roll', 'STU');
-          document.getElementById('roll').value = newRoll;
-        } else {
-          // Fallback generation
-          const students = JSON.parse(localStorage.getItem('students') || '[]');
-          const existing = new Set(students.map(s => s.roll));
-          
-          const cleanName = name.replace(/\s+/g, '').toUpperCase().substring(0, 3);
-          const date = new Date(dob);
-          const day = String(date.getDate()).padStart(2, '0');
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          
-          let baseID = cleanName + day + month;
-          let finalID = baseID;
-          let attempts = 0;
-          
-          while (existing.has(finalID) && attempts < 100) {
-            attempts++;
-            const suffix = String(attempts).padStart(2, '0');
-            finalID = baseID.substring(0, 5) + suffix;
-          }
-          
-          document.getElementById('roll').value = finalID.substring(0, 7).toUpperCase();
-        }
-        
-        // Show success message
-        const rollInput = document.getElementById('roll');
-        rollInput.style.border = '2px solid #28a745';
-        rollInput.style.background = '#f0fff4';
-        
-        setTimeout(() => {
-          rollInput.style.border = '';
-          rollInput.style.background = '';
-        }, 2000);
-        
-        // Show notification
-        const btn = document.getElementById('genRollBtn');
-        const originalText = btn.textContent;
-        btn.textContent = '✓ Generated!';
-        btn.style.background = '#28a745';
-        setTimeout(() => {
-          btn.textContent = originalText;
-          btn.style.background = '';
-        }, 2000);
-      } catch (error) {
-        console.error('Error generating ID:', error);
-        alert('Error generating student ID. Please check that name and date of birth are valid.');
-      }
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const existing = new Set(students.map(s => s.roll));
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth()+1).padStart(2,'0');
+      const d = String(today.getDate()).padStart(2,'0');
+      let seq = 1; let roll = '';
+      do { roll = `R-${y}${m}${d}-${String(seq).padStart(4,'0')}`; seq++; } while (existing.has(roll));
+      document.getElementById('roll').value = roll;
     }
     const photoInputEl = document.getElementById('photo');
     if (photoInputEl) {
