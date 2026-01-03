@@ -6,6 +6,8 @@
   <title>ClassSahyogi - School Management System</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- Face API.js library for face recognition -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -293,13 +295,17 @@
     
     .modal-content {
       background: white;
-      margin: 5% auto;
+      margin: 2% auto;
       padding: 0;
       border-radius: 20px;
       width: 90%;
       max-width: 500px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
       box-shadow: 0 25px 50px rgba(0,0,0,0.3);
       animation: modalSlideIn 0.3s ease-out;
+      overflow: hidden;
     }
     
     @keyframes modalSlideIn {
@@ -341,7 +347,33 @@
     }
     
     .modal-body {
-      padding: 30px;
+      padding: 20px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      max-height: calc(90vh - 80px);
+    }
+    
+    #faceidLogin .modal-body {
+      padding: 15px 20px;
+    }
+    
+    .modal-body::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .modal-body::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .modal-body::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+    
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: #555;
     }
     
     .login-tabs {
@@ -415,6 +447,12 @@
     
     .login-submit-btn:hover {
       transform: translateY(-2px);
+    }
+    
+    .login-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
     
     .demo-info {
@@ -492,6 +530,256 @@
       color: #adb5bd;
     }
     
+    /* Face ID Login Styles */
+    #faceidLogin .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .video-container {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      max-width: 250px;
+      max-height: 250px;
+      margin: 8px auto;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #000;
+      border: 4px solid #dc3545;
+      transition: border-color 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .video-container.face-detected {
+      border-color: #28a745;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .video-container.no-face {
+      border-color: #dc3545;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+    #faceVideoElement {
+      width: 100%;
+      height: 100%;
+      display: none;
+      transform: scaleX(-1);
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #000;
+      border-radius: 50%;
+    }
+    #faceVideoElement.active {
+      display: block !important;
+      visibility: visible;
+    }
+    .face-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 180px;
+      height: 180px;
+      border: 3px solid transparent;
+      border-radius: 50%;
+      pointer-events: none;
+      display: none;
+      z-index: 10;
+    }
+    .face-overlay.active {
+      display: block;
+    }
+    .face-overlay.face-detected {
+      border-color: #28a745;
+      animation: pulseGreen 2s infinite;
+    }
+    .face-overlay.no-face {
+      border-color: #dc3545;
+      animation: pulseRed 2s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { 
+        border-color: #28a745;
+        box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+      }
+      50% { 
+        border-color: #20c997;
+        box-shadow: 0 0 20px rgba(32, 201, 151, 0.7);
+      }
+    }
+    @keyframes pulseRed {
+      0%, 100% { 
+        border-color: #dc3545;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+      }
+      50% { 
+        border-color: #ff6b6b;
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
+      }
+    }
+    .status-message {
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      min-height: 35px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 13px;
+    }
+    
+    #faceidLogin .status-message {
+      margin: 6px 0;
+      padding: 6px 10px;
+      min-height: 30px;
+      font-size: 12px;
+    }
+    .status-detecting {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-recognizing {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .face-button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .face-button-group button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .face-button-group button:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+    .face-button-group button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .face-button-group .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .face-button-group .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    .face-button-group .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    .loading {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(102, 126, 234, 0.2);
+      border-radius: 50%;
+      border-top-color: #667eea;
+      border-right-color: #764ba2;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #faceLoadingIndicator {
+      text-align: center;
+      padding: 15px;
+    }
+    .face-security-info {
+      background: #f8f9fa;
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #666;
+      text-align: left;
+    }
+    .face-security-info strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .face-security-info ul {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+    .face-security-info li {
+      margin: 5px 0;
+    }
+    .face-backup-login {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 2px solid #e1e5e9;
+      text-align: center;
+      font-size: 13px;
+    }
+    .face-backup-login a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 0 10px;
+      display: inline-block;
+      transition: color 0.3s ease;
+    }
+    .face-backup-login a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+    /* Make select match input styling */
+    .form-group select {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+      background: white;
+      font-family: 'Inter', sans-serif;
+    }
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    #faceCameraPlaceholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      color: #fff;
+      flex-direction: column;
+      padding: 15px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 50%;
+    }
+    
     /* Responsive design */
     @media (max-width: 768px) {
       .hero-title {
@@ -529,18 +817,45 @@
   <!-- Header -->
   <header class="header">
     <div class="header-content">
-      <div class="logo">
-        <div class="logo-icon">
-          <div style="width: 30px; height: 30px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
-            <div style="width: 20px; height: 20px; background: #fff; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-              <div style="width: 12px; height: 12px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border-radius: 2px; position: relative;">
-                <div style="position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; background: #fff; border-radius: 1px;"></div>
-                <div style="position: absolute; bottom: 2px; right: 2px; width: 4px; height: 4px; background: #fff; border-radius: 1px;"></div>
-              </div>
+      <div class="logo" style="background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b3d 100%); border: 1px solid rgba(64,224,208,0.2); box-shadow: 0 8px 30px rgba(0,0,0,0.6), inset 0 0 100px rgba(64,224,208,0.1); position: relative; overflow: hidden;">
+        <!-- Starfield Background -->
+        <div style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(2px 2px at 20% 30%, white, transparent),radial-gradient(2px 2px at 60% 70%, white, transparent),radial-gradient(1px 1px at 50% 50%, white, transparent),radial-gradient(1px 1px at 80% 10%, white, transparent),radial-gradient(2px 2px at 90% 40%, white, transparent);background-size:200% 200%;opacity:0.6;z-index:1;"></div>
+        
+        <div class="logo-icon" style="z-index:2;position:relative;">
+          <!-- CS Monogram -->
+          <div style="display:flex;align-items:center;gap:3px;margin-bottom:6px;">
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#00d4ff 0%,#0099cc 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;text-shadow:0 0 12px rgba(0,212,255,0.8);box-shadow:0 0 18px rgba(0,212,255,0.5),inset 0 1px 0 rgba(255,255,255,0.3);transform:rotate(-5deg);">C</div>
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#32ff88 0%,#00cc66 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:#fff;text-shadow:0 0 12px rgba(50,255,136,0.8);box-shadow:0 0 18px rgba(50,255,136,0.5),inset 0 1px 0 rgba(255,255,255,0.3);transform:rotate(5deg);">S</div>
+          </div>
+          
+          <!-- Book with Circuit Board -->
+          <div style="width:50px;height:32px;background:linear-gradient(135deg,#c0c0c0 0%,#808080 100%);border-radius:4px;position:relative;margin-bottom:5px;box-shadow:0 2px 8px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.3);">
+            <!-- Circuit Pattern Left Page -->
+            <div style="position:absolute;left:2px;top:4px;width:20px;height:24px;background:linear-gradient(135deg,#00d4ff 0%,#0099cc 100%);border-radius:2px;opacity:0.9;">
+              <div style="position:absolute;top:3px;left:3px;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:3px 0 0 #fff,6px 0 0 #fff,0 4px 0 #fff,3px 4px 0 #fff,6px 4px 0 #fff,0 8px 0 #fff,3px 8px 0 #fff,6px 8px 0 #fff;"></div>
+              <div style="position:absolute;top:5px;left:1px;width:18px;height:1px;background:#fff;opacity:0.6;"></div>
+              <div style="position:absolute;top:10px;left:1px;width:18px;height:1px;background:#fff;opacity:0.6;"></div>
+            </div>
+            <!-- Circuit Pattern Right Page -->
+            <div style="position:absolute;right:2px;top:4px;width:20px;height:24px;background:linear-gradient(135deg,#32ff88 0%,#00cc66 100%);border-radius:2px;opacity:0.9;">
+              <div style="position:absolute;top:3px;right:3px;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:-3px 0 0 #fff,-6px 0 0 #fff,0 4px 0 #fff,-3px 4px 0 #fff,-6px 4px 0 #fff,0 8px 0 #fff,-3px 8px 0 #fff,-6px 8px 0 #fff;"></div>
+              <div style="position:absolute;top:5px;right:1px;width:18px;height:1px;background:#fff;opacity:0.6;"></div>
+              <div style="position:absolute;top:10px;right:1px;width:18px;height:1px;background:#fff;opacity:0.6;"></div>
             </div>
           </div>
+          
+          <!-- Network Connection -->
+          <div style="display:flex;align-items:center;gap:3px;justify-content:center;">
+            <div style="width:4px;height:4px;background:#00d4ff;border-radius:50%;box-shadow:0 0 6px rgba(0,212,255,0.8);"></div>
+            <div style="width:10px;height:2px;background:linear-gradient(90deg,#00d4ff 0%,#32ff88 100%);"></div>
+            <div style="width:4px;height:4px;background:#32ff88;border-radius:50%;box-shadow:0 0 6px rgba(50,255,136,0.8);"></div>
+            <div style="width:10px;height:2px;background:linear-gradient(90deg,#32ff88 0%,#00d4ff 100%);"></div>
+            <div style="width:4px;height:4px;background:#00d4ff;border-radius:50%;box-shadow:0 0 6px rgba(0,212,255,0.8);"></div>
+          </div>
         </div>
-        <div class="logo-text">ClassSahyogi</div>
+        <div class="logo-text" style="z-index:2;position:relative;">
+          <span style="color:#c0c0c0;text-shadow:0 0 8px rgba(192,192,192,0.6),0 2px 4px rgba(0,0,0,0.5);">Class</span><span style="background:linear-gradient(135deg,#00d4ff 0%,#32ff88 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:none;filter:drop-shadow(0 0 8px rgba(0,212,255,0.6));">Sahyogi</span>
+        </div>
       </div>
       <button class="login-btn" onclick="openLoginModal()">
         <i class="fas fa-sign-in-alt"></i> Login
@@ -588,6 +903,21 @@
             attendance, grades, and important notifications.
           </div>
         </div>
+        
+        <div class="feature-card" onclick="window.location.href='face-id-login.html'">
+          <div class="feature-icon">🔐</div>
+          <div class="feature-title">Face ID Login</div>
+          <div class="feature-description">
+            Secure biometric authentication using facial recognition. 
+            Fast, secure, and password-free login for all users.
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="face-id-register.html" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+          📸 Register Face ID
+        </a>
       </div>
       
       <!-- Stats section -->
@@ -634,8 +964,11 @@
       <div class="modal-body">
         <div class="login-tabs">
           <button class="tab-btn active" onclick="switchTab('admin')">Admin</button>
-          <button class="tab-btn" onclick="switchTab('teacher')">Teacher</button>
+          <button class="tab-btn" onclick="switchTab('staff')">Staff</button>
           <button class="tab-btn" onclick="switchTab('student')">Student</button>
+          <button class="tab-btn" onclick="switchTab('faceid')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+            <i class="fas fa-face-smile"></i> Face ID
+          </button>
         </div>
         
         <div id="adminLogin" class="login-form active">
@@ -654,27 +987,30 @@
           </form>
         </div>
         
-        <div id="teacherLogin" class="login-form">
-          <form onsubmit="login('teacher', event)">
+        <div id="staffLogin" class="login-form">
+          <form onsubmit="login('staff', event)">
             <div class="form-group">
-              <label><i class="fas fa-id-card"></i> Teacher ID</label>
-              <input type="text" id="teacherId" placeholder="Enter Teacher ID" required>
+              <label><i class="fas fa-id-card"></i> Staff ID</label>
+              <input type="text" id="staffId" placeholder="Enter Staff ID" required>
             </div>
             <div class="form-group">
               <label><i class="fas fa-lock"></i> Password (Optional)</label>
-              <input type="password" id="teacherPassword" placeholder="Enter Password (optional)">
+              <input type="password" id="staffPassword" placeholder="Enter Password (optional)">
             </div>
             <div class="login-options">
               <label class="checkbox-label">
-                <input type="checkbox" id="teacherIdOnly" onchange="toggleTeacherPassword()">
+                <input type="checkbox" id="staffIdOnly" onchange="toggleStaffPassword()">
                 <span class="checkmark"></span>
                 Login with ID only (no password required)
               </label>
             </div>
             <button type="submit" class="login-submit-btn">
-              <i class="fas fa-sign-in-alt"></i> Login as Teacher
+              <i class="fas fa-sign-in-alt"></i> Login as Staff
             </button>
           </form>
+          <div class="demo-info" style="margin-top: 15px;">
+            <p><strong>Note:</strong> All staff members (Teachers, Accountants, Admin Staff, etc.) can login here.</p>
+          </div>
         </div>
         
         <div id="studentLogin" class="login-form">
@@ -689,6 +1025,49 @@
           </form>
           <div class="demo-info">
             <p><strong>Note:</strong> Student ID is generated when student is added by teacher.</p>
+          </div>
+        </div>
+        
+        <div id="faceidLogin" class="login-form">
+          <div class="form-group">
+            <label for="faceUserRole"><i class="fas fa-user-tag"></i> User Type</label>
+            <select id="faceUserRole" onchange="handleFaceRoleChange()">
+              <option value="">Select User Type</option>
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Admin</option>
+              <option value="accountant">Accountant</option>
+              <option value="librarian">Librarian</option>
+            </select>
+          </div>
+          
+          <div class="video-container">
+            <video id="faceVideoElement" autoplay playsinline muted></video>
+            <div class="face-overlay" id="faceOverlay"></div>
+            <div id="faceCameraPlaceholder">
+              <div style="font-size: 3rem; margin-bottom: 10px;">📷</div>
+              <div>Camera will appear here</div>
+            </div>
+          </div>
+          
+          <div class="status-message status-detecting" id="faceStatusMessage">
+            <span id="faceStatusText">Select user type and click "Start Camera"</span>
+            <div id="faceLoadingIndicator" style="display: none; margin-top: 10px;">
+              <div class="loading"></div>
+              <div style="margin-top: 10px; font-size: 0.85rem;">Loading face recognition models...</div>
+            </div>
+          </div>
+          
+          <div class="face-button-group">
+            <button type="button" class="btn-primary" onclick="startFaceCamera()" id="faceStartBtn">
+              <i class="fas fa-video"></i> Start Camera
+            </button>
+          </div>
+          
+          <div class="face-backup-login">
+            <a href="face-id-register.html">
+              <i class="fas fa-user-plus"></i> Register Face ID
+            </a>
           </div>
         </div>
       </div>
@@ -748,22 +1127,53 @@
       
       // Add active class to selected tab and form
       event.target.classList.add('active');
-      document.getElementById(role + 'Login').classList.add('active');
+      let formId;
+      if (role === 'admin') {
+        formId = 'adminLogin';
+      } else if (role === 'staff') {
+        formId = 'staffLogin';
+      } else if (role === 'faceid') {
+        formId = 'faceidLogin';
+        // Initialize Face ID when tab is opened
+        if (typeof faceapi !== 'undefined' && !window.faceModelsLoaded) {
+          initializeFaceID();
+        }
+      } else {
+        formId = role + 'Login';
+      }
+      document.getElementById(formId).classList.add('active');
       
-      // Reset teacher login options when switching tabs
-      if (role === 'teacher') {
-        document.getElementById('teacherIdOnly').checked = false;
-        document.getElementById('teacherPassword').required = true;
-        document.getElementById('teacherPassword').placeholder = 'Enter Password';
+      // Stop camera if switching away from Face ID
+      if (role !== 'faceid' && window.faceStream) {
+        stopFaceCamera();
+      }
+      
+      // Reset staff login options when switching tabs
+      if (role === 'staff') {
+        const staffIdOnly = document.getElementById('staffIdOnly');
+        const staffPassword = document.getElementById('staffPassword');
+        if (staffIdOnly) {
+          staffIdOnly.checked = false;
+          if (staffPassword) {
+            staffPassword.required = true;
+            staffPassword.placeholder = 'Enter Password';
+            staffPassword.disabled = false;
+            const passwordLabel = document.querySelector('#staffLogin .form-group:nth-child(2) label');
+            if (passwordLabel) {
+              passwordLabel.innerHTML = '<i class="fas fa-lock"></i> Password (Optional)';
+              passwordLabel.style.color = '#333';
+            }
+          }
+        }
       }
     }
 
-    function toggleTeacherPassword() {
-      const idOnlyCheckbox = document.getElementById('teacherIdOnly');
-      const passwordInput = document.getElementById('teacherPassword');
-      const passwordLabel = document.querySelector('#teacherLogin .form-group:nth-child(2) label');
+    function toggleStaffPassword() {
+      const idOnlyCheckbox = document.getElementById('staffIdOnly');
+      const passwordInput = document.getElementById('staffPassword');
+      const passwordLabel = document.querySelector('#staffLogin .form-group:nth-child(2) label');
       
-      if (idOnlyCheckbox.checked) {
+      if (idOnlyCheckbox && idOnlyCheckbox.checked) {
         passwordInput.required = false;
         passwordInput.placeholder = 'Password not required';
         passwordInput.value = '';
@@ -801,47 +1211,90 @@
             name: 'Admin User',
             loginTime: new Date().toISOString()
           }));
+          // Redirect to admin dashboard with all features
           window.location.href = 'admin-dashboard.html';
         } else {
           alert('Invalid Admin credentials!');
         }
-      } else if (role === 'teacher') {
-        const teacherId = document.getElementById('teacherId').value;
-        const password = document.getElementById('teacherPassword').value;
-        const idOnlyMode = document.getElementById('teacherIdOnly').checked;
+      } else if (role === 'staff') {
+        const staffId = document.getElementById('staffId').value;
+        const password = document.getElementById('staffPassword').value;
+        const idOnlyMode = document.getElementById('staffIdOnly').checked;
         
-        const staff = JSON.parse(localStorage.getItem('staffData')) || [];
-        let teacher = null;
+        const allStaff = JSON.parse(localStorage.getItem('staffData')) || [];
+        let staffMember = null;
         
         if (idOnlyMode) {
           // Login with ID only - check both id and staffId fields
-          teacher = staff.find(s => s.id === teacherId || s.staffId === teacherId);
-          if (teacher) {
-            sessionStorage.setItem('currentUser', JSON.stringify({
-              id: teacherId,
-              role: 'teacher',
-              name: teacher.name,
+          staffMember = allStaff.find(s => s.id === staffId || s.staffId === staffId);
+          if (staffMember) {
+            // Store in both sessionStorage and localStorage for compatibility
+            const userData = {
+              id: staffId,
+              role: staffMember.role.toLowerCase(),
+              name: staffMember.name,
               loginTime: new Date().toISOString(),
               loginMode: 'id-only'
+            };
+            sessionStorage.setItem('currentUser', JSON.stringify(userData));
+            localStorage.setItem('currentStaff', JSON.stringify({
+              id: staffMember.id || staffMember.staffId,
+              staffId: staffMember.staffId || staffMember.id,
+              name: staffMember.name,
+              department: staffMember.department || 'N/A',
+              role: staffMember.role,
+              email: staffMember.email || '',
+              phone: staffMember.phone || ''
             }));
-            window.location.href = 'teacher-dashboard.html';
+            
+            // Redirect based on role
+            if (staffMember.role === 'Accountant') {
+              window.location.href = 'accountant-dashboard.html';
+            } else if (staffMember.role === 'Librarian') {
+              window.location.href = 'librarian-dashboard.html';
+            } else if (staffMember.role === 'Teacher') {
+              window.location.href = 'teacher-dashboard.html';
+            } else {
+              window.location.href = 'staff-dashboard.html';
+            }
           } else {
-            alert('Invalid Teacher ID! Please check the ID and try again.\n\nClick "Show Available Teachers" to see valid IDs.');
+            alert('Invalid Staff ID! Please check the ID and try again.\n\nClick "Show Available Staff" to see valid IDs.');
           }
         } else {
           // Login with ID and password - check both id and staffId fields
-          teacher = staff.find(s => (s.id === teacherId || s.staffId === teacherId) && s.password === password);
-          if (teacher) {
-            sessionStorage.setItem('currentUser', JSON.stringify({
-              id: teacherId,
-              role: 'teacher',
-              name: teacher.name,
+          staffMember = allStaff.find(s => (s.id === staffId || s.staffId === staffId) && s.password === password);
+          if (staffMember) {
+            // Store in both sessionStorage and localStorage for compatibility
+            const userData = {
+              id: staffId,
+              role: staffMember.role.toLowerCase(),
+              name: staffMember.name,
               loginTime: new Date().toISOString(),
               loginMode: 'id-password'
+            };
+            sessionStorage.setItem('currentUser', JSON.stringify(userData));
+            localStorage.setItem('currentStaff', JSON.stringify({
+              id: staffMember.id || staffMember.staffId,
+              staffId: staffMember.staffId || staffMember.id,
+              name: staffMember.name,
+              department: staffMember.department || 'N/A',
+              role: staffMember.role,
+              email: staffMember.email || '',
+              phone: staffMember.phone || ''
             }));
-            window.location.href = 'teacher-dashboard.html';
+            
+            // Redirect based on role
+            if (staffMember.role === 'Accountant') {
+              window.location.href = 'accountant-dashboard.html';
+            } else if (staffMember.role === 'Librarian') {
+              window.location.href = 'librarian-dashboard.html';
+            } else if (staffMember.role === 'Teacher') {
+              window.location.href = 'teacher-dashboard.html';
+            } else {
+              window.location.href = 'staff-dashboard.html';
+            }
           } else {
-            alert('Invalid Teacher credentials! Please check ID and password.\n\nClick "Show Available Teachers" to see valid credentials.');
+            alert('Invalid Staff credentials! Please check ID and password.\n\nClick "Show Available Staff" to see valid credentials.');
           }
         }
       } else if (role === 'student') {
@@ -868,22 +1321,23 @@
       document.querySelector('.features-grid').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function showAvailableTeachers() {
+    function showAvailableStaff() {
       const staff = JSON.parse(localStorage.getItem('staffData')) || [];
       if (staff.length === 0) {
-        alert('No teachers found! Please add teachers first through the admin dashboard.');
+        alert('No staff members found! Please add staff first through the admin dashboard.');
         return;
       }
       
-      let teacherList = 'Available Teachers:\n\n';
-      staff.forEach((teacher, index) => {
-        teacherList += `${index + 1}. Name: ${teacher.name}\n`;
-        teacherList += `   ID: ${teacher.id || teacher.staffId}\n`;
-        teacherList += `   Password: ${teacher.password || 'Not set'}\n`;
-        teacherList += `   Role: ${teacher.role}\n\n`;
+      let staffList = 'Available Staff Members:\n\n';
+      staff.forEach((staffMember, index) => {
+        staffList += `${index + 1}. Name: ${staffMember.name}\n`;
+        staffList += `   ID: ${staffMember.id || staffMember.staffId}\n`;
+        staffList += `   Password: ${staffMember.password || 'Not set'}\n`;
+        staffList += `   Role: ${staffMember.role}\n`;
+        staffList += `   Department: ${staffMember.department || 'N/A'}\n\n`;
       });
       
-      alert(teacherList);
+      alert(staffList);
     }
 
     // Close modal when clicking outside
@@ -892,6 +1346,779 @@
       if (event.target === modal) {
         closeLoginModal();
       }
+    }
+    // ========== Face ID Login Functions ==========
+    let faceStream = null;
+    let faceModelsLoaded = false;
+    let faceModelsLoading = false;
+    let faceRecognitionInterval = null;
+    let faceLoginAttempts = 0;
+    let isRecognizing = false;
+    let faceDetectionCount = 0;
+    let lastRecognitionAttempt = 0;
+    const FACE_MAX_ATTEMPTS = 5;
+    const FACE_ATTEMPT_RESET_TIME = 15 * 60 * 1000; // 15 minutes
+    const FACE_DETECTION_THRESHOLD = 1; // Number of consecutive detections before auto-recognition (reduced for speed)
+    const AUTO_RECOGNITION_DELAY = 300; // Delay between auto recognition attempts (ms) - reduced for faster login
+
+    // Initialize Face ID system
+    function initializeFaceID() {
+      if (typeof faceapi === 'undefined') {
+        updateFaceStatus('Loading Face API library...', 'status-detecting');
+        setTimeout(() => {
+          if (typeof faceapi !== 'undefined') {
+            loadFaceModels();
+          } else {
+            updateFaceStatus('Face API library failed to load. Please refresh the page.', 'status-error');
+          }
+        }, 2000);
+      } else {
+        loadFaceModels();
+      }
+    }
+
+    // Load face-api models
+    async function loadFaceModels() {
+      if (faceModelsLoading) {
+        updateFaceStatus('Models are already loading. Please wait...', 'status-detecting');
+        return;
+      }
+
+      if (faceModelsLoaded) {
+        updateFaceStatus('Models already loaded. Ready for face recognition.', 'status-success');
+        window.faceModelsLoaded = true;
+        return;
+      }
+
+      faceModelsLoading = true;
+      updateFaceStatus('Loading face recognition models... This may take a moment.', 'status-detecting');
+      
+      const loadingIndicator = document.getElementById('faceLoadingIndicator');
+      if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+      }
+
+      if (typeof faceapi === 'undefined') {
+        updateFaceStatus('Face API library not loaded. Please check your internet connection.', 'status-error');
+        faceModelsLoading = false;
+        return;
+      }
+
+      const modelUrls = [
+        'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights',
+        'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights',
+        'https://unpkg.com/face-api.js@0.22.2/weights'
+      ];
+
+      let loaded = false;
+
+      for (const MODEL_URL of modelUrls) {
+        try {
+          updateFaceStatus(`Loading models from ${MODEL_URL.split('/').pop()}...`, 'status-detecting');
+          
+          const loadPromise = Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+            faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
+          ]);
+
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Model loading timeout')), 30000)
+          );
+
+          await Promise.race([loadPromise, timeoutPromise]);
+          
+          faceModelsLoaded = true;
+          window.faceModelsLoaded = true;
+          faceModelsLoading = false;
+          loaded = true;
+          updateFaceStatus('Models loaded successfully! Ready for face recognition.', 'status-success');
+          
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+          }
+          break;
+        } catch (error) {
+          console.error(`Error loading models from ${MODEL_URL}:`, error);
+          continue;
+        }
+      }
+
+      if (!loaded) {
+        faceModelsLoading = false;
+        updateFaceStatus('Failed to load models. Please check your internet connection.', 'status-error');
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+      }
+    }
+
+    function handleFaceRoleChange() {
+      const role = document.getElementById('faceUserRole').value;
+      if (role) {
+        updateFaceStatus(`Selected: ${role.charAt(0).toUpperCase() + role.slice(1)}. Click "Start Camera" to begin.`, 'status-detecting');
+      }
+    }
+
+    async function startFaceCamera() {
+      const role = document.getElementById('faceUserRole').value;
+      if (!role) {
+        alert('Please select a user type first');
+        return;
+      }
+
+      if (faceModelsLoading) {
+        updateFaceStatus('Models are still loading. Please wait...', 'status-detecting');
+        setTimeout(() => {
+          if (faceModelsLoaded) {
+            startFaceCamera();
+          } else {
+            alert('Models are still loading. Please wait a moment and try again.');
+          }
+        }, 2000);
+        return;
+      }
+
+      if (!faceModelsLoaded) {
+        updateFaceStatus('Loading models...', 'status-detecting');
+        await loadFaceModels();
+        if (!faceModelsLoaded) {
+          alert('Unable to load face recognition models. Please refresh the page and try again.');
+          return;
+        }
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        navigator.getUserMedia = navigator.getUserMedia || 
+                                 navigator.webkitGetUserMedia || 
+                                 navigator.mozGetUserMedia || 
+                                 navigator.msGetUserMedia;
+        
+        if (!navigator.getUserMedia) {
+          alert('Camera access is not supported in your browser.');
+          updateFaceStatus('Camera not supported.', 'status-error');
+          return;
+        }
+      }
+
+      updateFaceStatus('Requesting camera access...', 'status-detecting');
+      document.getElementById('faceStartBtn').disabled = true;
+
+      try {
+        let videoConstraints = {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user'
+        };
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          faceStream = await navigator.mediaDevices.getUserMedia({
+            video: videoConstraints,
+            audio: false
+          });
+        } else if (navigator.getUserMedia) {
+          faceStream = await new Promise((resolve, reject) => {
+            navigator.getUserMedia(
+              { video: videoConstraints, audio: false },
+              resolve,
+              reject
+            );
+          });
+        }
+        
+        if (!faceStream) {
+          throw new Error('No stream received');
+        }
+        
+        window.faceStream = faceStream;
+        const video = document.getElementById('faceVideoElement');
+        const placeholder = document.getElementById('faceCameraPlaceholder');
+        
+        if (!video) {
+          console.error('Video element not found');
+          updateFaceStatus('Video element not found. Please refresh the page.', 'status-error');
+          document.getElementById('faceStartBtn').disabled = false;
+          return;
+        }
+        
+        if (placeholder) {
+          placeholder.style.display = 'none';
+        }
+        
+        // Set video properties before setting srcObject
+        video.style.display = 'block';
+        video.style.visibility = 'visible';
+        video.style.opacity = '1';
+        video.classList.add('active');
+        video.srcObject = faceStream;
+        
+        // Force video to load
+        video.load();
+        
+        const playVideo = () => {
+          video.play().then(() => {
+            console.log('Video playing successfully');
+            document.getElementById('faceStartBtn').disabled = true;
+            
+            updateFaceStatus('Camera started. Position your face in the frame.', 'status-detecting');
+            const overlay = document.getElementById('faceOverlay');
+            const videoContainer = document.querySelector('.video-container');
+            if (overlay) {
+              overlay.classList.add('active', 'no-face');
+            }
+            if (videoContainer) {
+              videoContainer.classList.add('no-face');
+            }
+            
+            startFaceLivenessDetection();
+          }).catch(err => {
+            console.error('Error playing video:', err);
+            updateFaceStatus('Error starting video. Please try again.', 'status-error');
+            document.getElementById('faceStartBtn').disabled = false;
+            stopFaceCamera();
+          });
+        };
+        
+        // Try multiple ways to ensure video plays
+        if (video.readyState >= 2) {
+          // Video already loaded
+          playVideo();
+        } else {
+          video.onloadedmetadata = () => {
+            console.log('Video metadata loaded');
+            playVideo();
+          };
+          
+          video.oncanplay = () => {
+            console.log('Video can play');
+            playVideo();
+          };
+        }
+        
+        // Fallback: try to play after a short delay
+        setTimeout(() => {
+          if (video.paused && video.readyState >= 2) {
+            console.log('Attempting fallback video play');
+            playVideo();
+          }
+        }, 500);
+        
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        document.getElementById('faceStartBtn').disabled = false;
+        
+        let errorMessage = 'Unable to access camera. ';
+        
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+          errorMessage += 'Camera permission denied. Please allow camera access.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage += 'No camera found.';
+        } else if (error.name === 'NotReadableError') {
+          errorMessage += 'Camera is being used by another application.';
+        } else {
+          errorMessage += 'Error: ' + error.message;
+        }
+        
+        updateFaceStatus(errorMessage, 'status-error');
+        alert(errorMessage);
+      }
+    }
+
+    function startFaceLivenessDetection() {
+      if (faceRecognitionInterval) clearInterval(faceRecognitionInterval);
+      
+      // Reset detection counter
+      faceDetectionCount = 0;
+      isRecognizing = false;
+      
+      const videoContainer = document.querySelector('.video-container');
+      const overlay = document.getElementById('faceOverlay');
+      
+      faceRecognitionInterval = setInterval(async () => {
+        // Don't detect if already recognizing
+        if (isRecognizing) {
+          return;
+        }
+        
+        const video = document.getElementById('faceVideoElement');
+        if (video && video.readyState === video.HAVE_ENOUGH_DATA) {
+          try {
+            // Use faster detection without expressions for speed
+            const detection = await faceapi
+              .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
+              .withFaceLandmarks();
+            
+            if (detection) {
+              // Face detected - show green
+              if (videoContainer) {
+                videoContainer.classList.remove('no-face');
+                videoContainer.classList.add('face-detected');
+              }
+              if (overlay) {
+                overlay.classList.remove('no-face');
+                overlay.classList.add('face-detected', 'active');
+              }
+              
+              faceDetectionCount++;
+              
+              // Auto-recognize immediately after first detection
+              if (faceDetectionCount >= FACE_DETECTION_THRESHOLD) {
+                const now = Date.now();
+                if (now - lastRecognitionAttempt >= AUTO_RECOGNITION_DELAY) {
+                  lastRecognitionAttempt = now;
+                  updateFaceStatus('Face detected! Recognizing...', 'status-recognizing');
+                  // Automatically recognize face
+                  autoRecognizeFace();
+                }
+              } else {
+                updateFaceStatus('Face detected. Recognizing...', 'status-recognizing');
+              }
+            } else {
+              // No face detected - show red
+              faceDetectionCount = 0;
+              if (videoContainer) {
+                videoContainer.classList.remove('face-detected');
+                videoContainer.classList.add('no-face');
+              }
+              if (overlay) {
+                overlay.classList.remove('face-detected');
+                overlay.classList.add('no-face', 'active');
+              }
+              updateFaceStatus('No face detected. Please position your face in the frame.', 'status-detecting');
+            }
+          } catch (error) {
+            console.error('Detection error:', error);
+          }
+        }
+      }, 500); // Reduced from 1000ms to 500ms for faster detection
+    }
+    
+    // Auto-recognition function (called automatically when face is detected)
+    async function autoRecognizeFace() {
+      if (isRecognizing) {
+        return;
+      }
+      
+      const role = document.getElementById('faceUserRole').value;
+      if (!role) {
+        return;
+      }
+      
+      isRecognizing = true;
+      updateFaceStatus('Recognizing face automatically...', 'status-recognizing');
+      
+      // Disable recognize button during auto-recognition
+      const recognizeBtn = document.getElementById('faceRecognizeBtn');
+      if (recognizeBtn) {
+        recognizeBtn.disabled = true;
+      }
+      
+      try {
+        const video = document.getElementById('faceVideoElement');
+        // Use faster detection options for speed
+        const detection = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        if (!detection) {
+          isRecognizing = false;
+          faceDetectionCount = 0;
+          updateFaceStatus('Face lost. Please position your face properly.', 'status-detecting');
+          if (recognizeBtn) {
+            recognizeBtn.disabled = false;
+          }
+          return;
+        }
+
+        const faceDescriptor = detection.descriptor;
+        const storedFaces = JSON.parse(localStorage.getItem('faceData') || '{}');
+        const roleFaces = storedFaces[role] || {};
+
+        if (Object.keys(roleFaces).length === 0) {
+          isRecognizing = false;
+          faceDetectionCount = 0;
+          updateFaceStatus('No registered faces found. Please register your face first.', 'status-error');
+          if (recognizeBtn) {
+            recognizeBtn.disabled = false;
+          }
+          return;
+        }
+
+        let bestMatch = null;
+        let bestDistance = Infinity;
+        const THRESHOLD = 0.65; // Slightly higher threshold for faster matching
+
+        for (const [userId, faceData] of Object.entries(roleFaces)) {
+          const storedDescriptor = new Float32Array(faceData.descriptor);
+          const distance = faceapi.euclideanDistance(faceDescriptor, storedDescriptor);
+          
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestMatch = { userId, distance, userData: faceData.userData };
+          }
+        }
+
+        if (bestMatch && bestMatch.distance < THRESHOLD) {
+          // Successful recognition
+          updateFaceStatus('Face recognized! Logging in...', 'status-success');
+          
+          const attemptData = JSON.parse(localStorage.getItem('faceLoginAttempts') || '{}');
+          attemptData[role] = { count: 0, timestamp: 0 };
+          localStorage.setItem('faceLoginAttempts', JSON.stringify(attemptData));
+          
+          stopFaceCamera();
+          
+          let userData = bestMatch.userData || {};
+          
+          if (!userData.name || !userData.id) {
+            try {
+              if (role === 'student') {
+                const students = JSON.parse(localStorage.getItem('students') || '[]');
+                const student = students.find(s => s.rollNumber === bestMatch.userId || s.id === bestMatch.userId);
+                if (student) {
+                  userData = {
+                    id: student.id,
+                    rollNumber: student.rollNumber,
+                    name: student.name,
+                    class: student.class,
+                    division: student.division,
+                    email: student.email,
+                    phone: student.phone
+                  };
+                }
+              } else if (role === 'teacher' || role === 'accountant' || role === 'librarian') {
+                const staff = JSON.parse(localStorage.getItem('staffData') || '[]');
+                const staffMember = staff.find(s => s.staffId === bestMatch.userId || s.id === bestMatch.userId);
+                if (staffMember) {
+                  userData = {
+                    id: staffMember.id,
+                    staffId: staffMember.staffId,
+                    name: staffMember.name,
+                    role: staffMember.role || role,
+                    department: staffMember.department,
+                    email: staffMember.email,
+                    phone: staffMember.phone
+                  };
+                }
+              } else if (role === 'admin') {
+                const admins = JSON.parse(localStorage.getItem('adminData') || '[]');
+                const admin = admins.find(a => a.adminId === bestMatch.userId || a.id === bestMatch.userId);
+                if (admin) {
+                  userData = {
+                    id: admin.id,
+                    adminId: admin.adminId,
+                    name: admin.name,
+                    email: admin.email
+                  };
+                }
+              }
+            } catch (err) {
+              console.error('Error fetching user data:', err);
+            }
+          }
+          
+          if (!userData.name) {
+            userData.name = bestMatch.userId;
+          }
+          if (!userData.id) {
+            userData.id = bestMatch.userId;
+          }
+          
+          setTimeout(() => {
+            redirectToFaceDashboard(role, bestMatch.userId, userData);
+          }, 300); // Reduced delay for faster redirect
+        } else {
+          // Failed recognition - reset and continue detection
+          isRecognizing = false;
+          faceDetectionCount = 0;
+          updateFaceStatus('Face not recognized. Please try again.', 'status-detecting');
+          if (recognizeBtn) {
+            recognizeBtn.disabled = false;
+          }
+        }
+      } catch (error) {
+        console.error('Auto recognition error:', error);
+        isRecognizing = false;
+        faceDetectionCount = 0;
+        updateFaceStatus('Error during recognition. Please try again.', 'status-error');
+        if (recognizeBtn) {
+          recognizeBtn.disabled = false;
+        }
+      }
+    }
+
+    async function recognizeFace() {
+      const role = document.getElementById('faceUserRole').value;
+      if (!role) {
+        alert('Please select a user type');
+        return;
+      }
+
+      const attemptData = JSON.parse(localStorage.getItem('faceLoginAttempts') || '{}');
+      const lastAttempt = attemptData[role] || { count: 0, timestamp: 0 };
+      
+      if (lastAttempt.count >= FACE_MAX_ATTEMPTS) {
+        const timeSinceLastAttempt = Date.now() - lastAttempt.timestamp;
+        if (timeSinceLastAttempt < FACE_ATTEMPT_RESET_TIME) {
+          const minutesLeft = Math.ceil((FACE_ATTEMPT_RESET_TIME - timeSinceLastAttempt) / 60000);
+          alert(`Too many failed attempts. Please try again after ${minutesLeft} minutes.`);
+          return;
+        } else {
+          attemptData[role] = { count: 0, timestamp: 0 };
+          localStorage.setItem('faceLoginAttempts', JSON.stringify(attemptData));
+        }
+      }
+
+      updateFaceStatus('Recognizing face... Please wait.', 'status-recognizing');
+      document.getElementById('faceRecognizeBtn').disabled = true;
+
+      try {
+        const video = document.getElementById('faceVideoElement');
+        // Use faster detection options for speed
+        const detection = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        if (!detection) {
+          updateFaceStatus('No face detected. Please position your face properly.', 'status-error');
+          document.getElementById('faceRecognizeBtn').disabled = false;
+          return;
+        }
+
+        const faceDescriptor = detection.descriptor;
+        const storedFaces = JSON.parse(localStorage.getItem('faceData') || '{}');
+        const roleFaces = storedFaces[role] || {};
+
+        if (Object.keys(roleFaces).length === 0) {
+          updateFaceStatus('No registered faces found. Please register your face first.', 'status-error');
+          document.getElementById('faceRecognizeBtn').disabled = false;
+          alert('No face registered for this user type. Please register your face first.');
+          return;
+        }
+
+        let bestMatch = null;
+        let bestDistance = Infinity;
+        const THRESHOLD = 0.65; // Slightly higher threshold for faster matching
+
+        for (const [userId, faceData] of Object.entries(roleFaces)) {
+          const storedDescriptor = new Float32Array(faceData.descriptor);
+          const distance = faceapi.euclideanDistance(faceDescriptor, storedDescriptor);
+          
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestMatch = { userId, distance, userData: faceData.userData };
+          }
+        }
+
+        if (bestMatch && bestMatch.distance < THRESHOLD) {
+          updateFaceStatus('Face recognized! Logging in...', 'status-success');
+          
+          attemptData[role] = { count: 0, timestamp: 0 };
+          localStorage.setItem('faceLoginAttempts', JSON.stringify(attemptData));
+          
+          stopFaceCamera();
+          
+          let userData = bestMatch.userData || {};
+          
+          if (!userData.name || !userData.id) {
+            try {
+              if (role === 'student') {
+                const students = JSON.parse(localStorage.getItem('students') || '[]');
+                const student = students.find(s => s.rollNumber === bestMatch.userId || s.id === bestMatch.userId);
+                if (student) {
+                  userData = {
+                    id: student.id,
+                    rollNumber: student.rollNumber,
+                    name: student.name,
+                    class: student.class,
+                    division: student.division,
+                    email: student.email,
+                    phone: student.phone
+                  };
+                }
+              } else if (role === 'teacher' || role === 'accountant' || role === 'librarian') {
+                const staff = JSON.parse(localStorage.getItem('staffData') || '[]');
+                const staffMember = staff.find(s => s.staffId === bestMatch.userId || s.id === bestMatch.userId);
+                if (staffMember) {
+                  userData = {
+                    id: staffMember.id,
+                    staffId: staffMember.staffId,
+                    name: staffMember.name,
+                    role: staffMember.role || role,
+                    department: staffMember.department,
+                    email: staffMember.email,
+                    phone: staffMember.phone
+                  };
+                }
+              } else if (role === 'admin') {
+                const admins = JSON.parse(localStorage.getItem('adminData') || '[]');
+                const admin = admins.find(a => a.adminId === bestMatch.userId || a.id === bestMatch.userId);
+                if (admin) {
+                  userData = {
+                    id: admin.id,
+                    adminId: admin.adminId,
+                    name: admin.name,
+                    email: admin.email
+                  };
+                }
+              }
+            } catch (err) {
+              console.error('Error fetching user data:', err);
+            }
+          }
+          
+          if (!userData.name) {
+            userData.name = bestMatch.userId;
+          }
+          if (!userData.id) {
+            userData.id = bestMatch.userId;
+          }
+          
+          setTimeout(() => {
+            redirectToFaceDashboard(role, bestMatch.userId, userData);
+          }, 1500);
+        } else {
+          faceLoginAttempts++;
+          attemptData[role] = {
+            count: (lastAttempt.count || 0) + 1,
+            timestamp: Date.now()
+          };
+          localStorage.setItem('faceLoginAttempts', JSON.stringify(attemptData));
+          
+          updateFaceStatus('Face not recognized. Please try again.', 'status-error');
+          document.getElementById('faceRecognizeBtn').disabled = false;
+          
+          if (attemptData[role].count >= FACE_MAX_ATTEMPTS) {
+            alert(`Too many failed attempts. Account temporarily locked.`);
+          }
+        }
+      } catch (error) {
+        console.error('Recognition error:', error);
+        updateFaceStatus('Error during recognition. Please try again.', 'status-error');
+        document.getElementById('faceRecognizeBtn').disabled = false;
+      }
+    }
+
+    function redirectToFaceDashboard(role, userId, userData) {
+      try {
+        const sessionData = {
+          id: userId,
+          role: role,
+          name: userData.name || 'User',
+          loginTime: new Date().toISOString(),
+          loginMethod: 'face_id'
+        };
+        
+        sessionStorage.setItem('currentUser', JSON.stringify(sessionData));
+        
+        let redirectUrl = '';
+        
+        if (role === 'student') {
+          localStorage.setItem('currentStudent', JSON.stringify(userData));
+          redirectUrl = 'student-dashboard.html';
+        } else if (role === 'teacher') {
+          localStorage.setItem('currentStaff', JSON.stringify(userData));
+          redirectUrl = 'teacher-dashboard.html';
+        } else if (role === 'admin') {
+          localStorage.setItem('adminLoggedIn', 'true');
+          localStorage.setItem('adminUser', JSON.stringify(sessionData));
+          redirectUrl = 'admin-dashboard.html';
+        } else if (role === 'accountant') {
+          localStorage.setItem('currentStaff', JSON.stringify(userData));
+          redirectUrl = 'accountant-dashboard.html';
+        } else if (role === 'librarian') {
+          localStorage.setItem('currentStaff', JSON.stringify(userData));
+          redirectUrl = 'librarian-dashboard.html';
+        } else {
+          redirectUrl = 'index (13).html';
+        }
+        
+        if (redirectUrl) {
+          window.location.replace(redirectUrl);
+        }
+      } catch (error) {
+        console.error('Error during redirect:', error);
+        alert('Error during login. Please try again.');
+      }
+    }
+
+    function stopFaceCamera() {
+      isRecognizing = false;
+      faceDetectionCount = 0;
+      
+      if (faceStream) {
+        faceStream.getTracks().forEach(track => {
+          track.stop();
+          track.enabled = false;
+        });
+        faceStream = null;
+        window.faceStream = null;
+      }
+      
+      if (faceRecognitionInterval) {
+        clearInterval(faceRecognitionInterval);
+        faceRecognitionInterval = null;
+      }
+      
+      const video = document.getElementById('faceVideoElement');
+      const placeholder = document.getElementById('faceCameraPlaceholder');
+      
+      if (video) {
+        video.srcObject = null;
+        video.pause();
+        video.style.display = 'none';
+        video.classList.remove('active');
+      }
+      
+      if (placeholder) {
+        placeholder.style.display = 'flex';
+      }
+      
+      const startBtn = document.getElementById('faceStartBtn');
+      const recognizeBtn = document.getElementById('faceRecognizeBtn');
+      const stopBtn = document.getElementById('faceStopBtn');
+      
+      if (startBtn) startBtn.disabled = false;
+      if (recognizeBtn) recognizeBtn.disabled = true;
+      if (stopBtn) stopBtn.disabled = true;
+      
+      const overlay = document.getElementById('faceOverlay');
+      if (overlay) overlay.classList.remove('active');
+      
+      updateFaceStatus('Camera stopped.', 'status-detecting');
+    }
+
+    function updateFaceStatus(message, className) {
+      const statusEl = document.getElementById('faceStatusMessage');
+      const statusText = document.getElementById('faceStatusText');
+      const loadingIndicator = document.getElementById('faceLoadingIndicator');
+      
+      if (statusText) {
+        statusText.textContent = message;
+      } else if (statusEl) {
+        statusEl.innerHTML = `<span>${message}</span>`;
+      }
+      
+      if (statusEl) {
+        statusEl.className = 'status-message ' + className;
+      }
+      
+      if (loadingIndicator) {
+        if (faceModelsLoading && !faceModelsLoaded) {
+          loadingIndicator.style.display = 'block';
+        } else {
+          loadingIndicator.style.display = 'none';
+        }
+      }
+    }
+
+    // Cleanup on modal close
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+      stopFaceCamera();
     }
   </script>
 </body>

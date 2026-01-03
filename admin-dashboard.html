@@ -21,80 +21,105 @@
       margin: 0;
       padding: 0;
       background: #f0f2f5;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
     .header {
       background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ff6b6b 100%);
       color: white;
-      padding: 20px;
+      padding: 12px 20px;
       text-align: center;
       box-shadow: 0 4px 20px rgba(30,60,114,0.3);
     }
     .logo {
-      width: 60px;
-      height: 60px;
+      width: 45px;
+      height: 45px;
       background: rgba(255,255,255,0.2);
-      border-radius: 15px;
+      border-radius: 12px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 15px;
+      margin-bottom: 8px;
     }
     .logo-text {
-      font-size: 1.2rem;
+      font-size: 1rem;
       font-weight: 800;
       color: #fff;
       letter-spacing: 1px;
     }
+    .header h1 {
+      font-size: 1.5rem;
+      margin: 8px 0;
+    }
     .admin-info {
       background: rgba(255,255,255,0.1);
-      padding: 15px;
-      border-radius: 10px;
-      margin: 15px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin: 10px auto;
+      max-width: 400px;
+      font-size: 0.9rem;
+    }
+    .admin-info h3 {
+      margin: 0 0 5px 0;
+      font-size: 1rem;
+    }
+    .admin-info p {
+      margin: 3px 0;
+      font-size: 0.85rem;
     }
     .container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 15px;
+      height: calc(100vh - 160px);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
+    .container::-webkit-scrollbar { display: none; }
+    .container { -ms-overflow-style: none; scrollbar-width: none; }
     .card {
       background: white;
-      border-radius: 15px;
-      padding: 25px;
-      margin: 20px 0;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 12px 0;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      font-size: 1.3rem;
+      margin: 0 0 15px 0;
     }
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 20px 0;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 12px 0;
     }
     .stat-card {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 20px;
-      border-radius: 12px;
+      padding: 14px;
+      border-radius: 10px;
       text-align: center;
       box-shadow: 0 4px 15px rgba(102,126,234,0.3);
     }
     .stat-value {
-      font-size: 2rem;
+      font-size: 1.6rem;
       font-weight: bold;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
     .stat-label {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       opacity: 0.9;
     }
     .back-btn {
       background: #e5e7eb;
       color: #111827;
-      padding: 10px 20px;
+      padding: 8px 16px;
       border-radius: 8px;
       text-decoration: none;
       display: inline-block;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
       transition: background 0.3s;
     }
     .back-btn:hover {
@@ -102,15 +127,15 @@
     }
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      margin: 20px 0;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 12px 0;
     }
     .feature-card {
       background: #f8fafc;
       border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 10px;
+      padding: 14px;
       text-align: center;
       transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
@@ -120,18 +145,19 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
     .feature-icon {
-      font-size: 2.5rem;
-      margin-bottom: 15px;
+      font-size: 2rem;
+      margin-bottom: 10px;
     }
     .feature-title {
-      font-size: 1.2rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #2d3748;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .feature-desc {
       color: #666;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
+      line-height: 1.3;
     }
     .access-level {
       display: inline-block;
@@ -146,9 +172,10 @@
       background: #fff3cd;
       border: 1px solid #ffeaa7;
       color: #856404;
-      padding: 15px;
+      padding: 12px;
       border-radius: 8px;
-      margin: 20px 0;
+      margin: 12px 0;
+      font-size: 0.9rem;
     }
   </style>
 </head>
@@ -189,9 +216,9 @@
       </div>
     </div>
 
-    <!-- Admin Features -->
+    <!-- All System Features -->
     <div class="card">
-      <h2>🔧 Administrative Functions</h2>
+      <h2>🔧 All System Features</h2>
       <div class="feature-grid">
         <div class="feature-card" onclick="manageStaff()">
           <div class="feature-icon">👥</div>
@@ -202,21 +229,42 @@
         
         <div class="feature-card" onclick="viewStudents()">
           <div class="feature-icon">👨‍🎓</div>
-          <div class="feature-title">Student Management</div>
+          <div class="feature-title">Student Enrollment</div>
           <div class="feature-desc">View and manage student records</div>
           <div class="access-level admin-access">Admin Only</div>
         </div>
         
-        <div class="feature-card" onclick="systemSettings()">
-          <div class="feature-icon">⚙️</div>
-          <div class="feature-title">System Settings</div>
-          <div class="feature-desc">Configure system parameters and settings</div>
+        <div class="feature-card" onclick="manageFees()">
+          <div class="feature-icon">💰</div>
+          <div class="feature-title">Fees Management</div>
+          <div class="feature-desc">Manage student fees and payments</div>
+          <div class="access-level admin-access">Admin Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="manageAttendance()">
+          <div class="feature-icon">🧾</div>
+          <div class="feature-title">Attendance</div>
+          <div class="feature-desc">Track and manage student attendance</div>
+          <div class="access-level admin-access">Admin Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="manageMarks()">
+          <div class="feature-icon">🎓</div>
+          <div class="feature-title">Marks Management</div>
+          <div class="feature-desc">Record and manage student marks</div>
+          <div class="access-level admin-access">Admin Only</div>
+        </div>
+        
+        <div class="feature-card" onclick="manageTimetable()">
+          <div class="feature-icon">📅</div>
+          <div class="feature-title">Timetable</div>
+          <div class="feature-desc">Create and manage class schedules</div>
           <div class="access-level admin-access">Admin Only</div>
         </div>
         
         <div class="feature-card" onclick="viewReports()">
           <div class="feature-icon">📊</div>
-          <div class="feature-title">System Reports</div>
+          <div class="feature-title">Analytics & Reports</div>
           <div class="feature-desc">Generate comprehensive system reports</div>
           <div class="access-level admin-access">Admin Only</div>
         </div>
@@ -226,20 +274,6 @@
           <div class="feature-title">Data Backup</div>
           <div class="feature-desc">Backup and restore system data</div>
           <div class="access-level admin-access">Admin Only</div>
-        </div>
-        
-        <div class="feature-card" onclick="userManagement()">
-          <div class="feature-icon">👤</div>
-          <div class="feature-title">User Management</div>
-          <div class="feature-desc">Manage user accounts and permissions</div>
-          <div class="access-level admin-access">Admin Only</div>
-        </div>
-        
-        <div class="feature-card" onclick="window.location.href='teams-integration.html'" style="background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%); color: white; border-color: #464EB8;">
-          <div class="feature-icon">💼</div>
-          <div class="feature-title">Microsoft Teams</div>
-          <div class="feature-desc">Share files with all students easily</div>
-          <div class="access-level" style="background: rgba(255,255,255,0.2); color: white;">Admin & Teacher</div>
         </div>
       </div>
     </div>
@@ -286,9 +320,10 @@
 
     function loadAdminData() {
       const adminInfo = document.getElementById('adminInfo');
+      const adminName = adminUser.name || adminUser.username || adminUser.id || 'Admin';
       adminInfo.innerHTML = `
-        <h3>${adminUser.username}</h3>
-        <p><strong>Role:</strong> ${adminUser.role}</p>
+        <h3>${adminName}</h3>
+        <p><strong>Role:</strong> ${adminUser.role || 'admin'}</p>
         <p><strong>Login Time:</strong> ${new Date(adminUser.loginTime).toLocaleString()}</p>
       `;
     }
@@ -318,12 +353,24 @@
       window.location.href = 'enrollment.html';
     }
 
-    function systemSettings() {
-      alert('System Settings feature will be implemented in future updates.');
+    function manageFees() {
+      window.location.href = 'fees.html';
+    }
+
+    function manageAttendance() {
+      window.location.href = 'attendance.html';
+    }
+
+    function manageMarks() {
+      window.location.href = 'marks (3).html';
+    }
+
+    function manageTimetable() {
+      window.location.href = 'timetable.html';
     }
 
     function viewReports() {
-      window.open('analytics.html', '_blank');
+      window.location.href = 'analytics.html';
     }
 
     function backupData() {
@@ -349,9 +396,6 @@
       alert('System backup created successfully!');
     }
 
-    function userManagement() {
-      alert('User Management feature will be implemented in future updates.');
-    }
 
     // Logout function
     function logout() {

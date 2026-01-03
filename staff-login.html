@@ -139,15 +139,6 @@
   </div>
 
   <script>
-    // Sample staff data (in real system, this would come from database)
-    const staffData = {
-      'STF001': { name: 'Dr. Sarah Johnson', department: 'Mathematics', role: 'Senior Teacher' },
-      'STF002': { name: 'Mr. Michael Chen', department: 'Science', role: 'Lab Assistant' },
-      'STF003': { name: 'Ms. Emily Davis', department: 'English', role: 'Teacher' },
-      'STF004': { name: 'Mr. David Wilson', department: 'Administration', role: 'Office Manager' },
-      'STF005': { name: 'Mrs. Lisa Brown', department: 'Library', role: 'Librarian' }
-    };
-
     document.getElementById('staffLoginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -159,26 +150,43 @@
         return;
       }
       
-      // Check if staff exists
-      const staff = staffData[staffId];
+      // Get actual staff data from localStorage
+      const allStaffData = JSON.parse(localStorage.getItem('staffData')) || [];
+      
+      // Check if staff exists - check both id and staffId fields
+      const staff = allStaffData.find(s => 
+        (s.id && s.id.toUpperCase() === staffId) || 
+        (s.staffId && s.staffId.toUpperCase() === staffId)
+      );
       
       if (staff) {
         // Update staff info display
         document.getElementById('staffName').textContent = staff.name;
-        document.getElementById('staffDept').textContent = staff.department;
+        document.getElementById('staffDept').textContent = staff.department || 'N/A';
         document.getElementById('staffRole').textContent = staff.role;
         
         // Store current staff data
         localStorage.setItem('currentStaff', JSON.stringify({
-          id: staffId,
-          ...staff
+          id: staff.id || staff.staffId,
+          staffId: staff.staffId || staff.id,
+          name: staff.name,
+          department: staff.department || 'N/A',
+          role: staff.role,
+          email: staff.email || '',
+          phone: staff.phone || ''
         }));
         
         messageDiv.innerHTML = '<div class="success">Login successful! Redirecting...</div>';
         
-        // Redirect to staff dashboard
+        // Redirect based on role
         setTimeout(() => {
-          window.location.href = 'staff-dashboard.html';
+          if (staff.role === 'Accountant') {
+            window.location.href = 'accountant-dashboard.html';
+          } else if (staff.role === 'Librarian') {
+            window.location.href = 'librarian-dashboard.html';
+          } else {
+            window.location.href = 'staff-dashboard.html';
+          }
         }, 1500);
       } else {
         messageDiv.innerHTML = '<div class="error">Staff ID not found. Please check your ID or contact administration.</div>';

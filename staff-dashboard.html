@@ -14,7 +14,8 @@
       margin: 0;
       padding: 0;
       background: #f0f2f5;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
     .header {
       background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ff6b6b 100%);
@@ -49,7 +50,14 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
+      height: calc(100vh - 200px);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
+    .container::-webkit-scrollbar { width: 8px; }
+    .container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .container::-webkit-scrollbar-thumb { background: #667eea; border-radius: 10px; }
+    .container::-webkit-scrollbar-thumb:hover { background: #764ba2; }
     .card {
       background: white;
       border-radius: 15px;
@@ -144,7 +152,7 @@
     <div class="logo">
       <div class="logo-text">CS</div>
     </div>
-    <h1>👥 Staff Dashboard</h1>
+    <h1 id="dashboardTitle">👥 Staff Dashboard</h1>
     <div class="staff-info" id="staffInfo">
       <!-- Staff info will be loaded here -->
     </div>
@@ -156,30 +164,177 @@
     <!-- Quick Stats -->
     <div class="card">
       <h2>📊 Quick Overview</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="totalStudents">0</div>
-          <div class="stat-label">Total Students</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="totalStaff">0</div>
-          <div class="stat-label">Total Staff</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="todayAttendance">0%</div>
-          <div class="stat-label">Today's Attendance</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="activeClasses">0</div>
-          <div class="stat-label">Active Classes</div>
-        </div>
+      <div class="stats-grid" id="statsGrid">
+        <!-- Stats will be dynamically loaded based on role -->
       </div>
     </div>
 
     <!-- Available Features -->
     <div class="card">
       <h2>🔧 Available Features</h2>
-      <div class="feature-grid">
+      <div class="feature-grid" id="featureGrid">
+        <!-- Features will be dynamically loaded based on role -->
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <h2>📋 Recent Activity</h2>
+      <div id="recentActivity">
+        <p style="color: #666; text-align: center; padding: 20px;">No recent activity to display</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStaff = null;
+    let isAccountant = false;
+
+    // Load staff data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      currentStaff = JSON.parse(localStorage.getItem('currentStaff'));
+      
+      if (!currentStaff) {
+        alert('No staff data found. Please login again.');
+        window.location.href = 'staff-login.html';
+        return;
+      }
+
+      // Check if user is an accountant
+      isAccountant = currentStaff.role === 'Accountant';
+
+      // Update dashboard title for accountants
+      if (isAccountant) {
+        document.getElementById('dashboardTitle').textContent = '💰 Accounting Dashboard';
+      }
+
+      loadStaffData();
+      loadQuickStats();
+      loadFeatures();
+    });
+
+    function loadStaffData() {
+      const staffInfo = document.getElementById('staffInfo');
+      const roleBadge = isAccountant ? '<span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-left: 10px;">💰 Accounting Portal</span>' : '';
+      staffInfo.innerHTML = `
+        <h3>${currentStaff.name} ${roleBadge}</h3>
+        <p><strong>Staff ID:</strong> ${currentStaff.id || currentStaff.staffId}</p>
+        <p><strong>Department:</strong> ${currentStaff.department}</p>
+        <p><strong>Role:</strong> ${currentStaff.role}</p>
+      `;
+    }
+
+    function loadQuickStats() {
+      const statsGrid = document.getElementById('statsGrid');
+      
+      if (isAccountant) {
+        // Show only accounting-related stats
+        const feesData = JSON.parse(localStorage.getItem('feesData')) || [];
+        const students = JSON.parse(localStorage.getItem('students')) || [];
+        
+        const paidFees = feesData.filter(f => f.status === 'Paid');
+        const totalCollected = paidFees.reduce((sum, f) => sum + (f.amount || 0), 0);
+        const studentsPaid = new Set(paidFees.map(f => f.studentRoll)).size;
+        const studentsPending = students.length - studentsPaid;
+        const pendingAmount = studentsPending * 1000; // Assuming ₹1000 per student
+        
+        statsGrid.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-value">₹${totalCollected.toLocaleString()}</div>
+            <div class="stat-label">Total Fees Collected</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">₹${pendingAmount.toLocaleString()}</div>
+            <div class="stat-label">Pending Fees</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${studentsPaid}</div>
+            <div class="stat-label">Students Paid</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${studentsPending}</div>
+            <div class="stat-label">Students Pending</div>
+          </div>
+        `;
+      } else {
+        // Show general stats for other staff
+        const students = JSON.parse(localStorage.getItem('students')) || [];
+        const allStaffData = JSON.parse(localStorage.getItem('staffData')) || [];
+        const attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+        
+        const today = new Date().toISOString().slice(0,10);
+        let totalStudents = 0;
+        let presentStudents = 0;
+        
+        Object.values(attendance).forEach(divisionAttendance => {
+          if (divisionAttendance[today]) {
+            const todayAttendance = divisionAttendance[today];
+            totalStudents += todayAttendance.length;
+            presentStudents += todayAttendance.filter(record => record.status === 'Present').length;
+          }
+        });
+        
+        const attendancePercentage = totalStudents > 0 ? Math.round((presentStudents / totalStudents) * 100) : 0;
+        const activeClasses = Object.keys(attendance).length;
+        
+        statsGrid.innerHTML = `
+        <div class="stat-card">
+            <div class="stat-value">${students.length}</div>
+          <div class="stat-label">Total Students</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${allStaffData.length}</div>
+          <div class="stat-label">Total Staff</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${attendancePercentage}%</div>
+          <div class="stat-label">Today's Attendance</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${activeClasses}</div>
+          <div class="stat-label">Active Classes</div>
+        </div>
+        `;
+      }
+    }
+
+    function loadFeatures() {
+      const featureGrid = document.getElementById('featureGrid');
+      
+      if (isAccountant) {
+        // Show only accounting-related features
+        featureGrid.innerHTML = `
+          <div class="feature-card" onclick="viewFees()">
+            <div class="feature-icon">💰</div>
+            <div class="feature-title">Fees Management</div>
+            <div class="feature-desc">Manage fee payments and records</div>
+            <div class="access-level full-access">Full Access</div>
+          </div>
+          
+          <div class="feature-card" onclick="viewFinancialReports()">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Financial Reports</div>
+            <div class="feature-desc">View financial reports and analytics</div>
+            <div class="access-level full-access">Full Access</div>
+      </div>
+          
+          <div class="feature-card" onclick="viewPaymentHistory()">
+            <div class="feature-icon">📋</div>
+            <div class="feature-title">Payment History</div>
+            <div class="feature-desc">View all payment transactions</div>
+            <div class="access-level full-access">Full Access</div>
+    </div>
+
+          <div class="feature-card" onclick="viewAnalytics()">
+            <div class="feature-icon">📈</div>
+            <div class="feature-title">Financial Analytics</div>
+            <div class="feature-desc">View financial statistics and trends</div>
+            <div class="access-level full-access">Full Access</div>
+          </div>
+        `;
+      } else {
+        // Show all features for other staff
+        featureGrid.innerHTML = `
         <div class="feature-card" onclick="viewStudents()">
           <div class="feature-icon">👥</div>
           <div class="feature-title">View Students</div>
@@ -221,80 +376,8 @@
           <div class="feature-desc">View performance reports and statistics</div>
           <div class="access-level view-only">View Only</div>
         </div>
-      </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="card">
-      <h2>📋 Recent Activity</h2>
-      <div id="recentActivity">
-        <p style="color: #666; text-align: center; padding: 20px;">No recent activity to display</p>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let currentStaff = null;
-
-    // Load staff data on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      currentStaff = JSON.parse(localStorage.getItem('currentStaff'));
-      
-      if (!currentStaff) {
-        alert('No staff data found. Please login again.');
-        window.location.href = 'staff-login.html';
-        return;
+        `;
       }
-
-      loadStaffData();
-      loadQuickStats();
-    });
-
-    function loadStaffData() {
-      const staffInfo = document.getElementById('staffInfo');
-      staffInfo.innerHTML = `
-        <h3>${currentStaff.name}</h3>
-        <p><strong>Staff ID:</strong> ${currentStaff.id}</p>
-        <p><strong>Department:</strong> ${currentStaff.department}</p>
-        <p><strong>Role:</strong> ${currentStaff.role}</p>
-      `;
-    }
-
-    function loadQuickStats() {
-      // Load student count
-      const students = JSON.parse(localStorage.getItem('students')) || [];
-      document.getElementById('totalStudents').textContent = students.length;
-
-      // Load staff count (from staff data)
-      const staffCount = Object.keys({
-        'STF001': { name: 'Dr. Sarah Johnson', department: 'Mathematics', role: 'Senior Teacher' },
-        'STF002': { name: 'Mr. Michael Chen', department: 'Science', role: 'Lab Assistant' },
-        'STF003': { name: 'Ms. Emily Davis', department: 'English', role: 'Teacher' },
-        'STF004': { name: 'Mr. David Wilson', department: 'Administration', role: 'Office Manager' },
-        'STF005': { name: 'Mrs. Lisa Brown', department: 'Library', role: 'Librarian' }
-      }).length;
-      document.getElementById('totalStaff').textContent = staffCount;
-
-      // Calculate today's attendance
-      const attendance = JSON.parse(localStorage.getItem('attendance')) || {};
-      let totalStudents = 0;
-      let presentStudents = 0;
-      const today = new Date().toISOString().slice(0,10);
-      
-      Object.values(attendance).forEach(divisionAttendance => {
-        if (divisionAttendance[today]) {
-          const todayAttendance = divisionAttendance[today];
-          totalStudents += todayAttendance.length;
-          presentStudents += todayAttendance.filter(record => record.status === 'Present').length;
-        }
-      });
-      
-      const attendancePercentage = totalStudents > 0 ? Math.round((presentStudents / totalStudents) * 100) : 0;
-      document.getElementById('todayAttendance').textContent = attendancePercentage + '%';
-
-      // Active classes (simplified)
-      const activeClasses = Object.keys(attendance).length;
-      document.getElementById('activeClasses').textContent = activeClasses;
     }
 
     // Feature navigation functions
@@ -320,6 +403,14 @@
 
     function viewAnalytics() {
       window.open('analytics.html', '_blank');
+    }
+
+    function viewFinancialReports() {
+      window.open('fees.html', '_blank');
+    }
+
+    function viewPaymentHistory() {
+      window.open('fees.html', '_blank');
     }
   </script>
 </body>

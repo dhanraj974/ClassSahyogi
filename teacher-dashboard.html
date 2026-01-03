@@ -16,9 +16,12 @@
   <style>
     html { scroll-behavior: smooth; }
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; overflow-x: hidden; }
-    .layout { display: flex; min-height: 100vh; }
-    nav { width: 220px; background: #232946; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 32px 0; }
+    body { margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100vh; overflow: hidden; }
+    .layout { display: flex; height: 100vh; overflow: hidden; }
+    nav { width: 220px; background: #232946; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 32px 0; overflow-y: auto; flex-shrink: 0; }
+    nav::-webkit-scrollbar { width: 6px; }
+    nav::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+    nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
     nav a { color: #fff; text-decoration: none; margin: 18px 0; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
     nav a:hover { color: #ffd700; }
     .user-info { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 20px; text-align: center; }
@@ -26,8 +29,12 @@
     .user-info p { margin: 0; font-size: 0.9rem; color: #ccc; }
     .logout-btn { background: #e74c3c; color: white; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; margin-top: 10px; }
     .logout-btn:hover { background: #c0392b; }
-    header { height: 64px; background: rgba(255,255,255,0.95); box-shadow: 0 2px 12px rgba(35,41,70,0.06); display: flex; align-items: center; padding: 0 36px; color: #232946; font-weight: 500; gap: 12px; }
-    .card { background: rgba(255,255,255,0.98); border-radius: 18px; box-shadow: 0 8px 32px rgba(35,41,70,0.10); margin: 32px 48px; padding: 36px 48px; min-height: 80vh; flex: 1; }
+    header { height: 64px; background: rgba(255,255,255,0.95); box-shadow: 0 2px 12px rgba(35,41,70,0.06); display: flex; align-items: center; padding: 0 36px; color: #232946; font-weight: 500; gap: 12px; flex-shrink: 0; }
+    .card { background: rgba(255,255,255,0.98); border-radius: 18px; box-shadow: 0 8px 32px rgba(35,41,70,0.10); margin: 16px 24px; padding: 24px 32px; height: calc(100vh - 96px); overflow-y: auto; overflow-x: hidden; flex: 1; }
+    .card::-webkit-scrollbar { width: 8px; }
+    .card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .card::-webkit-scrollbar-thumb { background: #667eea; border-radius: 10px; }
+    .card::-webkit-scrollbar-thumb:hover { background: #764ba2; }
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; }
     .stat-value { font-size: 2rem; font-weight: bold; margin-bottom: 8px; }
@@ -50,24 +57,47 @@
   <div class="layout">
     <nav>
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:40px;">
-        <div style="width:180px;height:100px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(30,60,114,0.4);padding:16px;position:relative;overflow:hidden;">
-          <div style="position:absolute;top:-10px;right:-10px;width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
-          <div style="position:absolute;bottom:-15px;left:-15px;width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;transform:rotate(-30deg);"></div>
-          <div style="width:50px;height:50px;background:rgba(255,255,255,0.95);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
-            <div style="width:30px;height:30px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;">
-              <div style="width:20px;height:20px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;">
-                <div style="width:12px;height:12px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:2px;position:relative;">
-                  <div style="position:absolute;top:2px;left:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
-                  <div style="position:absolute;bottom:2px;right:2px;width:4px;height:4px;background:#fff;border-radius:1px;"></div>
-                </div>
-              </div>
+        <div style="width:200px;height:140px;background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 50%,#2d1b3d 100%);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(0,0,0,0.6), inset 0 0 100px rgba(64,224,208,0.1);padding:20px;position:relative;overflow:hidden;border:1px solid rgba(64,224,208,0.2);">
+          <!-- Starfield Background -->
+          <div style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(2px 2px at 20% 30%, white, transparent),radial-gradient(2px 2px at 60% 70%, white, transparent),radial-gradient(1px 1px at 50% 50%, white, transparent),radial-gradient(1px 1px at 80% 10%, white, transparent),radial-gradient(2px 2px at 90% 40%, white, transparent);background-size:200% 200%;opacity:0.6;"></div>
+          
+          <!-- CS Monogram -->
+          <div style="display:flex;align-items:center;gap:2px;margin-bottom:8px;z-index:2;">
+            <div style="width:28px;height:28px;background:linear-gradient(135deg,#00d4ff 0%,#0099cc 100%);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:#fff;text-shadow:0 0 10px rgba(0,212,255,0.8);box-shadow:0 0 15px rgba(0,212,255,0.5),inset 0 1px 0 rgba(255,255,255,0.3);transform:rotate(-5deg);">C</div>
+            <div style="width:28px;height:28px;background:linear-gradient(135deg,#32ff88 0%,#00cc66 100%);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:#fff;text-shadow:0 0 10px rgba(50,255,136,0.8);box-shadow:0 0 15px rgba(50,255,136,0.5),inset 0 1px 0 rgba(255,255,255,0.3);transform:rotate(5deg);">S</div>
+          </div>
+          
+          <!-- Book with Circuit Board -->
+          <div style="width:45px;height:30px;background:linear-gradient(135deg,#c0c0c0 0%,#808080 100%);border-radius:4px;position:relative;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.3);z-index:2;">
+            <!-- Circuit Pattern Left Page -->
+            <div style="position:absolute;left:2px;top:4px;width:18px;height:22px;background:linear-gradient(135deg,#00d4ff 0%,#0099cc 100%);border-radius:2px;opacity:0.9;">
+              <div style="position:absolute;top:3px;left:3px;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:3px 0 0 #fff,6px 0 0 #fff,0 4px 0 #fff,3px 4px 0 #fff,6px 4px 0 #fff,0 8px 0 #fff,3px 8px 0 #fff,6px 8px 0 #fff;"></div>
+              <div style="position:absolute;top:5px;left:1px;width:16px;height:1px;background:#fff;opacity:0.6;"></div>
+              <div style="position:absolute;top:10px;left:1px;width:16px;height:1px;background:#fff;opacity:0.6;"></div>
+            </div>
+            <!-- Circuit Pattern Right Page -->
+            <div style="position:absolute;right:2px;top:4px;width:18px;height:22px;background:linear-gradient(135deg,#32ff88 0%,#00cc66 100%);border-radius:2px;opacity:0.9;">
+              <div style="position:absolute;top:3px;right:3px;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:-3px 0 0 #fff,-6px 0 0 #fff,0 4px 0 #fff,-3px 4px 0 #fff,-6px 4px 0 #fff,0 8px 0 #fff,-3px 8px 0 #fff,-6px 8px 0 #fff;"></div>
+              <div style="position:absolute;top:5px;right:1px;width:16px;height:1px;background:#fff;opacity:0.6;"></div>
+              <div style="position:absolute;top:10px;right:1px;width:16px;height:1px;background:#fff;opacity:0.6;"></div>
             </div>
           </div>
-          <div style="font-size:1.4rem;font-weight:800;color:#fff;text-align:center;line-height:1.1;letter-spacing:2px;text-shadow:0 2px 4px rgba(0,0,0,0.3);">
-            <span style="color:#FFD700;text-shadow:0 0 10px rgba(255,215,0,0.5);">CS</span>
+          
+          <!-- Network Connection -->
+          <div style="display:flex;align-items:center;gap:3px;margin-bottom:6px;z-index:2;">
+            <div style="width:4px;height:4px;background:#00d4ff;border-radius:50%;box-shadow:0 0 6px rgba(0,212,255,0.8);"></div>
+            <div style="width:8px;height:2px;background:linear-gradient(90deg,#00d4ff 0%,#32ff88 100%);"></div>
+            <div style="width:4px;height:4px;background:#32ff88;border-radius:50%;box-shadow:0 0 6px rgba(50,255,136,0.8);"></div>
+            <div style="width:8px;height:2px;background:linear-gradient(90deg,#32ff88 0%,#00d4ff 100%);"></div>
+            <div style="width:4px;height:4px;background:#00d4ff;border-radius:50%;box-shadow:0 0 6px rgba(0,212,255,0.8);"></div>
           </div>
-          <div style="font-size:0.6rem;color:rgba(255,255,255,0.9);font-weight:500;margin-top:2px;letter-spacing:1px;">
-            ClassSahyogi
+          
+          <!-- Brand Text -->
+          <div style="font-size:1.1rem;font-weight:900;text-align:center;line-height:1.2;letter-spacing:1px;z-index:2;">
+            <span style="color:#c0c0c0;text-shadow:0 0 8px rgba(192,192,192,0.6),0 2px 4px rgba(0,0,0,0.5);">Class</span><span style="background:linear-gradient(135deg,#00d4ff 0%,#32ff88 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:none;filter:drop-shadow(0 0 8px rgba(0,212,255,0.6));">Sahyogi</span>
+          </div>
+          <div style="font-size:0.5rem;color:rgba(192,192,192,0.9);font-weight:600;margin-top:2px;letter-spacing:1.5px;text-transform:uppercase;z-index:2;">
+            Intelligent Learning Alliance
           </div>
         </div>
       </div>
@@ -83,23 +113,20 @@
       <a href="javascript:void(0)" onclick="navigateTo('attendance')"><span>🧾</span> Attendance</a>
       <a href="javascript:void(0)" onclick="navigateTo('marks')"><span>🎓</span> Marks</a>
       <a href="javascript:void(0)" onclick="navigateTo('timetable')"><span>📅</span> Timetable</a>
-      <a href="javascript:void(0)" onclick="navigateTo('fees')"><span>💰</span> Fees</a>
       <a href="javascript:void(0)" onclick="navigateTo('analytics')"><span>📊</span> Analytics</a>
       <a href="teams-integration.html" style="background: linear-gradient(135deg, #6264A7 0%, #464EB8 100%); padding: 12px; border-radius: 8px; margin-top: 10px;"><span>💼</span> Microsoft Teams</a>
     </nav>
     
-    <div style="flex:1;display:flex;flex-direction:column;min-height:100vh;">
+    <div style="flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;">
       <header>
-        <div style="width:140px;height:45px;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 50%,#ff6b6b 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;padding:8px;position:relative;overflow:hidden;box-shadow:0 4px 15px rgba(30,60,114,0.3);">
-          <div style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;background:rgba(255,255,255,0.1);border-radius:50%;transform:rotate(45deg);"></div>
-          <div style="width:25px;height:25px;background:rgba(255,255,255,0.95);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-right:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-            <div style="width:15px;height:15px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);border-radius:4px;position:relative;">
-              <div style="position:absolute;top:1px;left:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
-              <div style="position:absolute;bottom:1px;right:1px;width:2px;height:2px;background:#fff;border-radius:1px;"></div>
-            </div>
+        <div style="width:160px;height:45px;background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 50%,#2d1b3d 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;padding:8px;position:relative;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.5),inset 0 0 30px rgba(64,224,208,0.1);border:1px solid rgba(64,224,208,0.2);">
+          <!-- Mini CS Monogram -->
+          <div style="display:flex;align-items:center;gap:2px;margin-right:8px;">
+            <div style="width:18px;height:18px;background:linear-gradient(135deg,#00d4ff 0%,#0099cc 100%);border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.7rem;color:#fff;text-shadow:0 0 6px rgba(0,212,255,0.8);box-shadow:0 0 8px rgba(0,212,255,0.4),inset 0 1px 0 rgba(255,255,255,0.3);">C</div>
+            <div style="width:18px;height:18px;background:linear-gradient(135deg,#32ff88 0%,#00cc66 100%);border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:0.7rem;color:#fff;text-shadow:0 0 6px rgba(50,255,136,0.8);box-shadow:0 0 8px rgba(50,255,136,0.4),inset 0 1px 0 rgba(255,255,255,0.3);">S</div>
           </div>
-          <div style="font-size:0.9rem;font-weight:800;color:#fff;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,0.3);">
-            <span style="color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,0.4);">CS</span>
+          <div style="font-size:0.85rem;font-weight:800;letter-spacing:0.5px;">
+            <span style="color:#c0c0c0;text-shadow:0 0 6px rgba(192,192,192,0.4);">Class</span><span style="background:linear-gradient(135deg,#00d4ff 0%,#32ff88 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 6px rgba(0,212,255,0.4));">Sahyogi</span>
           </div>
         </div>
         <span>👨‍🏫 Teacher Dashboard - Limited Access</span>
@@ -147,7 +174,7 @@
               Clear
             </button>
           </div>
-          <div id="searchResults" style="max-height: 300px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px; background: white;">
+          <div id="searchResults" style="max-height: 300px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px; background: white; display: none; min-height: 50px;">
             <!-- Search results will appear here -->
           </div>
         </div>
@@ -174,11 +201,6 @@
             <div class="action-icon">📅</div>
             <div class="action-title">View Timetable</div>
             <div class="action-desc">Check class schedule</div>
-          </div>
-          <div class="action-card" onclick="navigateTo('fees')">
-            <div class="action-icon">💰</div>
-            <div class="action-title">View Fees</div>
-            <div class="action-desc">Check fee status</div>
           </div>
           <div class="action-card" onclick="navigateTo('analytics')">
             <div class="action-icon">📊</div>
@@ -290,7 +312,6 @@
         'attendance': 'attendance.html', 
         'marks': 'marks (3).html',
         'timetable': 'timetable.html',
-        'fees': 'fees.html',
         'analytics': 'analytics.html'
       };
       
@@ -312,41 +333,68 @@
     }
 
     function searchStudents() {
-      const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-      const resultsContainer = document.getElementById('searchResults');
-      
-      if (!searchTerm) {
-        resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Please enter a search term</div>';
-        return;
-      }
+      try {
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if (!searchInput || !resultsContainer) {
+          console.error('Search elements not found');
+          alert('Search functionality not available. Please refresh the page.');
+          return;
+        }
+        
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        
+        if (!searchTerm) {
+          resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Please enter a search term</div>';
+          return;
+        }
 
-      const students = JSON.parse(localStorage.getItem('students')) || [];
-      const filteredStudents = students.filter(student => 
-        student.name.toLowerCase().includes(searchTerm) ||
-        student.roll.toLowerCase().includes(searchTerm) ||
-        student.class.toLowerCase().includes(searchTerm) ||
-        student.section.toLowerCase().includes(searchTerm) ||
-        (student.course && student.course.toLowerCase().includes(searchTerm))
-      );
+        const students = JSON.parse(localStorage.getItem('students') || '[]');
+        
+        if (!students || students.length === 0) {
+          resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No students found in database</div>';
+          return;
+        }
+        
+        const filteredStudents = students.filter(student => {
+          if (!student) return false;
+          
+          const name = (student.name || '').toLowerCase();
+          const roll = (student.roll || student.rollNumber || student.id || '').toLowerCase();
+          const studentClass = (student.class || '').toLowerCase();
+          const section = (student.section || student.division || '').toLowerCase();
+          const course = (student.course || '').toLowerCase();
+          
+          return name.includes(searchTerm) ||
+                 roll.includes(searchTerm) ||
+                 studentClass.includes(searchTerm) ||
+                 section.includes(searchTerm) ||
+                 course.includes(searchTerm);
+        });
 
-      if (filteredStudents.length === 0) {
-        resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No students found matching your search</div>';
-        return;
-      }
+        if (filteredStudents.length === 0) {
+          resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No students found matching your search</div>';
+          return;
+        }
 
       let resultsHTML = '<div style="padding: 10px; background: #e9ecef; font-weight: 600; border-bottom: 1px solid #dee2e6;">Found ' + filteredStudents.length + ' student(s)</div>';
       
       filteredStudents.forEach(student => {
-        const attendance = getStudentAttendance(student.roll);
-        const marks = getStudentMarks(student.roll);
+        const rollNumber = student.roll || student.rollNumber || '';
+        const attendance = getStudentAttendance(rollNumber);
+        const marks = getStudentMarks(rollNumber);
+        const studentName = student.name || 'N/A';
+        const studentClass = student.class || '';
+        const studentSection = student.section || student.division || '';
         
         resultsHTML += `
           <div style="padding: 15px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
             <div style="flex: 1;">
-              <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${student.name}</div>
+              <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${studentName}</div>
               <div style="font-size: 0.9rem; color: #666;">
-                <span style="margin-right: 15px;">📋 Roll: ${student.roll}</span>
-                <span style="margin-right: 15px;">🏫 Class: ${student.class} ${student.section}</span>
+                <span style="margin-right: 15px;">📋 Roll: ${rollNumber}</span>
+                <span style="margin-right: 15px;">🏫 Class: ${studentClass} ${studentSection}</span>
                 ${student.course ? `<span style="margin-right: 15px;">📚 Course: ${student.course}</span>` : ''}
                 ${student.contact ? `<span>📞 ${student.contact}</span>` : ''}
               </div>
@@ -360,7 +408,7 @@
                 <div style="font-size: 0.8rem; color: #666;">Avg Marks</div>
                 <div style="font-weight: 600; color: ${marks >= 80 ? '#28a745' : marks >= 60 ? '#ffc107' : '#dc3545'};">${marks}%</div>
               </div>
-              <button onclick="viewStudentDetails('${student.roll}')" style="background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
+              <button onclick="viewStudentDetails('${rollNumber}')" style="background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
                 View Details
               </button>
             </div>
@@ -368,55 +416,104 @@
         `;
       });
 
-      resultsContainer.innerHTML = resultsHTML;
+        resultsContainer.innerHTML = resultsHTML;
+        resultsContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error in searchStudents:', error);
+        const resultsContainer = document.getElementById('searchResults');
+        if (resultsContainer) {
+          resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #dc3545;">Error searching students. Please try again.</div>';
+        }
+      }
     }
 
     function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('searchResults').innerHTML = '';
+      try {
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if (searchInput) {
+          searchInput.value = '';
+        }
+        if (resultsContainer) {
+          resultsContainer.innerHTML = '';
+          resultsContainer.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error clearing search:', error);
+      }
     }
 
     function getStudentAttendance(rollNumber) {
-      const attendance = JSON.parse(localStorage.getItem('attendance')) || {};
-      let totalDays = 0;
-      let presentDays = 0;
+      try {
+        if (!rollNumber) return 0;
+        
+        const attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+        let totalDays = 0;
+        let presentDays = 0;
 
-      Object.values(attendance).forEach(division => {
-        Object.values(division).forEach(dayRecords => {
-          const studentRecord = dayRecords.find(record => record.rollNumber === rollNumber);
-          if (studentRecord) {
-            totalDays++;
-            if (studentRecord.status === 'Present') {
-              presentDays++;
+        Object.values(attendance).forEach(division => {
+          if (!division || typeof division !== 'object') return;
+          Object.values(division).forEach(dayRecords => {
+            if (!Array.isArray(dayRecords)) return;
+            const studentRecord = dayRecords.find(record => 
+              (record.rollNumber === rollNumber) || 
+              (record.roll === rollNumber) ||
+              (record.id === rollNumber)
+            );
+            if (studentRecord) {
+              totalDays++;
+              if (studentRecord.status === 'Present' || studentRecord.status === 'present') {
+                presentDays++;
+              }
             }
-          }
+          });
         });
-      });
 
-      return totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+        return totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+      } catch (error) {
+        console.error('Error getting attendance:', error);
+        return 0;
+      }
     }
 
     function getStudentMarks(rollNumber) {
-      const marks = JSON.parse(localStorage.getItem('marks')) || {};
-      let totalMarks = 0;
-      let totalSubjects = 0;
+      try {
+        if (!rollNumber) return 0;
+        
+        const marks = JSON.parse(localStorage.getItem('marks')) || {};
+        let totalMarks = 0;
+        let totalSubjects = 0;
 
-      Object.values(marks).forEach(division => {
-        Object.values(division).forEach(subjectRecords => {
-          const studentRecord = subjectRecords.find(record => record.rollNumber === rollNumber);
-          if (studentRecord && studentRecord.marks) {
-            totalMarks += parseInt(studentRecord.marks);
-            totalSubjects++;
-          }
+        Object.values(marks).forEach(division => {
+          if (!division || typeof division !== 'object') return;
+          Object.values(division).forEach(subjectRecords => {
+            if (!Array.isArray(subjectRecords)) return;
+            const studentRecord = subjectRecords.find(record => 
+              (record.rollNumber === rollNumber) || 
+              (record.roll === rollNumber) ||
+              (record.id === rollNumber)
+            );
+            if (studentRecord && studentRecord.marks) {
+              const markValue = parseInt(studentRecord.marks);
+              if (!isNaN(markValue)) {
+                totalMarks += markValue;
+                totalSubjects++;
+              }
+            }
+          });
         });
-      });
 
-      return totalSubjects > 0 ? Math.round(totalMarks / totalSubjects) : 0;
+        return totalSubjects > 0 ? Math.round(totalMarks / totalSubjects) : 0;
+      } catch (error) {
+        console.error('Error getting marks:', error);
+        return 0;
+      }
     }
 
     function viewStudentDetails(rollNumber) {
       const students = JSON.parse(localStorage.getItem('students')) || [];
-      const student = students.find(s => s.roll === rollNumber);
+      const student = students.find(s => (s.roll === rollNumber) || (s.rollNumber === rollNumber));
       
       if (!student) {
         alert('Student not found!');
