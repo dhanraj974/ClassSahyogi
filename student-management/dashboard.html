@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard | Student Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="dashboard">
+  <header>
+    <div class="container navbar">
+      <a class="brand" href="index.html"><span>ClassSahyogi</span> SMS</a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html">Home</a>
+        <a href="login.html">Login/Register</a>
+        <a class="active" href="dashboard.html">Dashboard</a>
+        <a href="students.html">Student List</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="results.html">Results</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle>Menu</button>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <h2>Dashboard overview</h2>
+      <p class="helper">Quick summary for Admin, Teacher, and Student roles.</p>
+      <div class="grid three" style="margin-top: 18px;">
+        <div class="card">
+          <h3>Admin workspace</h3>
+          <p>Manage enrollment, teachers, courses, and result publishing.</p>
+          <div class="badge">Full access</div>
+        </div>
+        <div class="card">
+          <h3>Teacher workspace</h3>
+          <p>Track attendance, upload marks, and share assignments.</p>
+          <div class="badge">Limited access</div>
+        </div>
+        <div class="card">
+          <h3>Student workspace</h3>
+          <p>View profile, timetable, attendance, and academic results.</p>
+          <div class="badge">Read only</div>
+        </div>
+      </div>
+
+      <div class="section grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+        <div class="card">
+          <h3>Today at a glance</h3>
+          <p class="helper">Attendance submitted: <strong>87%</strong></p>
+          <p class="helper">Assignments pending: <strong>12</strong></p>
+          <p class="helper">Upcoming assessments: <strong>3</strong></p>
+        </div>
+        <div class="card">
+          <h3>Admin actions</h3>
+          <ul class="helper">
+            <li>Add, update, delete students.</li>
+            <li>Manage teachers and courses.</li>
+            <li>Review attendance and results.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Secure access</h3>
+          <p>JWT-based sessions, input validation, and hashed passwords keep data protected.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">Role-based dashboard with secure authentication</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

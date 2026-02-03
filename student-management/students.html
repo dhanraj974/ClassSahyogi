@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student List | Student Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="students">
+  <header>
+    <div class="container navbar">
+      <a class="brand" href="index.html"><span>ClassSahyogi</span> SMS</a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html">Home</a>
+        <a href="login.html">Login/Register</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="students.html">Student List</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="results.html">Results</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle>Menu</button>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <h2>Student list</h2>
+      <p class="helper">Admin can add, update, and delete students in the system.</p>
+
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 20px;">
+        <div class="card">
+          <h3>Quick actions</h3>
+          <ul class="helper">
+            <li>Add new student</li>
+            <li>Update profile details</li>
+            <li>Remove inactive students</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Filters</h3>
+          <form>
+            <div>
+              <label for="grade">Grade</label>
+              <select id="grade">
+                <option value="">All grades</option>
+                <option>10-A</option>
+                <option>9-B</option>
+              </select>
+            </div>
+            <div>
+              <label for="status">Status</label>
+              <select id="status">
+                <option value="">All</option>
+                <option>Active</option>
+                <option>Inactive</option>
+              </select>
+            </div>
+            <button class="button secondary" type="button">Apply filters</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="table-wrapper" style="margin-top: 24px;">
+        <table id="students-table">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Grade</th>
+              <th>Guardian</th>
+              <th>Contact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5">Loading students...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">Student records are stored securely with audit logs.</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

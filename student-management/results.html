@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Results | Student Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="results">
+  <header>
+    <div class="container navbar">
+      <a class="brand" href="index.html"><span>ClassSahyogi</span> SMS</a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html">Home</a>
+        <a href="login.html">Login/Register</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="students.html">Student List</a>
+        <a href="attendance.html">Attendance</a>
+        <a class="active" href="results.html">Results</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle>Menu</button>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <h2>Results & assignments</h2>
+      <p class="helper">Teachers upload marks and assignments. Students can view their performance.</p>
+
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 20px;">
+        <div class="card">
+          <h3>Upload marks</h3>
+          <form>
+            <div>
+              <label for="subject">Subject</label>
+              <input id="subject" type="text" placeholder="Mathematics" />
+            </div>
+            <div>
+              <label for="marks">Marks</label>
+              <input id="marks" type="number" placeholder="0 - 100" />
+            </div>
+            <button class="button" type="button">Publish marks</button>
+          </form>
+        </div>
+        <div class="card">
+          <h3>Assignment uploads</h3>
+          <p class="helper">Upload PDF or doc assignments to share with students.</p>
+          <button class="button secondary" type="button">Upload assignment</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper" style="margin-top: 24px;">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Marks</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="3">Loading results...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">Performance data is protected and role-restricted.</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

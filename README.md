@@ -39,6 +39,7 @@ A comprehensive school management system with three distinct user roles: Admin, 
 ## 📁 File Structure
 
 ```
+├── student-management/    # New responsive student management website (HTML/CSS/JS + sample backend)
 ├── main-portal.html        # Main entry point with role selection
 ├── login.html              # Common login page for all users
 ├── admin-dashboard.html    # Admin dashboard with full access
