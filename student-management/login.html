@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login | Student Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="login">
+  <header>
+    <div class="container navbar">
+      <a class="brand" href="index.html"><span>ClassSahyogi</span> SMS</a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html">Home</a>
+        <a class="active" href="login.html">Login/Register</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="students.html">Student List</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="results.html">Results</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button class="nav-toggle" type="button" data-nav-toggle>Menu</button>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+      <div class="card">
+        <h2>Secure access</h2>
+        <p class="helper">Use role-based authentication with encrypted passwords and input validation.</p>
+        <ul class="helper" style="margin-top: 16px;">
+          <li>Admin: Manage students, teachers, and courses.</li>
+          <li>Teacher: Mark attendance, upload marks & assignments.</li>
+          <li>Student: View attendance, timetable & results.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Login / Register</h2>
+        <form data-login-form>
+          <div>
+            <label for="email">Email address</label>
+            <input id="email" type="email" placeholder="name@school.edu" required />
+          </div>
+          <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="••••••••" required minlength="6" />
+          </div>
+          <div>
+            <label for="role">Select role</label>
+            <select id="role" required>
+              <option value="">Choose role</option>
+              <option value="Admin">Admin</option>
+              <option value="Teacher">Teacher</option>
+              <option value="Student">Student</option>
+            </select>
+          </div>
+          <button class="button" type="submit">Continue</button>
+          <div data-feedback class="helper"></div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">Validation enforced • Passwords hashed • Session-based access</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
